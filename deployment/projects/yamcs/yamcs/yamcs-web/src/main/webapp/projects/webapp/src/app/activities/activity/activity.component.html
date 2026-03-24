@@ -1,0 +1,60 @@
+@if (activity$ | async; as activity) {
+  <app-instance-page>
+    <app-instance-toolbar>
+      <ya-page-icon-button routerLink=".." [queryParams]="{ c: yamcs.context }" icon="arrow_back" />
+      Activity details &nbsp;&nbsp;&nbsp;
+      @if (activity.type === "MANUAL" && activity.status === "RUNNING" && mayControlActivities()) {
+        <ya-page-button (click)="setSuccessful(activity)" icon="thumb_up">
+          Set successful
+        </ya-page-button>
+        <ya-page-button (click)="setFailed(activity)" icon="thumb_down">Set failed</ya-page-button>
+      }
+      @if (mayControlActivities()) {
+        <ya-page-button
+          [disabled]="!!activity.stop"
+          (click)="cancelActivity(activity)"
+          icon="cancel">
+          Cancel
+        </ya-page-button>
+      }
+    </app-instance-toolbar>
+    <div class="activity-header">
+      <div class="activity-header-left">
+        <span class="title">{{ activity.detail }}</span>
+        <br />
+        <span class="subtitle">ID: {{ activity.id }}</span>
+        <br />
+        <span class="subtitle">Started {{ activity.start | datetime }}</span>
+        <br />
+      </div>
+      <div class="activity-header-right">
+        <app-activity-status [activity]="activity" />
+      </div>
+    </div>
+    <nav #tabs mat-tab-nav-bar class="secondary" [mat-stretch-tabs]="false" [tabPanel]="tabPanel">
+      <a
+        mat-tab-link
+        routerLink="log"
+        routerLinkActive
+        #rla="routerLinkActive"
+        [active]="rla.isActive"
+        [queryParams]="{ c: yamcs.context }">
+        Activity Log
+      </a>
+      <a
+        mat-tab-link
+        routerLink="details"
+        routerLinkActive
+        #rlb="routerLinkActive"
+        [active]="rlb.isActive"
+        [queryParams]="{ c: yamcs.context }">
+        Details
+      </a>
+    </nav>
+    <div class="tab-content-wrapper">
+      <mat-tab-nav-panel #tabPanel>
+        <router-outlet />
+      </mat-tab-nav-panel>
+    </div>
+  </app-instance-page>
+}

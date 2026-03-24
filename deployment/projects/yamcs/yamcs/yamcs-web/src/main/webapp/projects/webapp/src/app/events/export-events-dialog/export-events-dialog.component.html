@@ -1,0 +1,63 @@
+<h2 mat-dialog-title>Export events</h2>
+
+<mat-dialog-content class="ya-form">
+  <form [formGroup]="form">
+    <div class="label">
+      Start
+      <ya-date-time-input formControlName="start" />
+    </div>
+    <hr class="half-break" />
+    <div class="label">
+      Stop
+      <ya-date-time-input formControlName="stop" />
+    </div>
+    <hr class="half-break" />
+    <div class="label">
+      Query
+      <ya-filter-textarea formControlName="filter" />
+    </div>
+    <hr class="half-break" />
+    <div class="label">
+      Severity
+      <br />
+      <ya-select formControlName="severity">
+        <ya-option id="INFO" label="Info level" />
+        <ya-option id="WATCH" label="Watch level" />
+        <ya-option id="WARNING" label="Warning level" />
+        <ya-option id="DISTRESS" label="Distress level" />
+        <ya-option id="CRITICAL" label="Critical level" />
+        <ya-option id="SEVERE" label="Severe level" />
+      </ya-select>
+    </div>
+    <hr class="half-break" />
+    <div class="label">
+      Source
+      <br />
+      <ya-multi-select
+        formControlName="source"
+        [options]="data.sourceOptions"
+        emptyOption="Any source" />
+    </div>
+    <hr class="half-break" />
+    <div class="label">
+      CSV column delimiter
+      <br />
+      <ya-select formControlName="delimiter">
+        <ya-option id="COMMA" label="Comma" />
+        <ya-option id="SEMICOLON" label="Semicolon" />
+        <ya-option id="TAB" label="Tab" />
+      </ya-select>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <ya-button mat-dialog-close>CANCEL</ya-button>
+  <ya-download-button
+    [link]="downloadURL$ | async"
+    appearance="primary"
+    (click)="closeDialog()"
+    [disabled]="!form.valid">
+    DOWNLOAD
+  </ya-download-button>
+</mat-dialog-actions>

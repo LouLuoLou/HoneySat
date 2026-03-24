@@ -1,0 +1,33 @@
+<app-instance-page>
+  <app-instance-toolbar>Search results</app-instance-toolbar>
+
+  <div class="panel-content">
+    @if (result$ | async; as result) {
+      <div style="margin-bottom: 1em">
+        Showing {{ result.resources.length }} of {{ result.totalSize }} result
+        @if (result.totalSize !== 1) {
+          s
+        }
+        for "{{ term$ | async }}".
+      </div>
+      @for (resource of result.resources; track resource) {
+        <div>
+          <mat-icon class="icon12" style="vertical-align: middle; margin-right: 4px">toll</mat-icon>
+          <a class="ya-link" [routerLink]="resource.link" [queryParams]="{ c: yamcs.context }">
+            {{ resource.label }}
+          </a>
+          <br />
+        </div>
+      }
+      @if (result.resources.length) {
+        <mat-toolbar>
+          <span style="flex: 1 1 auto"></span>
+          <ya-button [disabled]="!result.continuationToken" (click)="loadMoreData()">
+            Load more
+          </ya-button>
+          <span style="flex: 1 1 auto"></span>
+        </mat-toolbar>
+      }
+    }
+  </div>
+</app-instance-page>

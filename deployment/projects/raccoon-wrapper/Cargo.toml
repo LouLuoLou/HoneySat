@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+members = [
+    "src/hs_zmq_interface",
+    "src/rccn_usr",
+    "src/rccn_usr_comm", 
+    "src/rccn_usr_example_app", 
+    "src/rccn_usr_gen", 
+    "src/rccn_usr_pus_macros",
+    "src/rccn_usr_honeysat_app"
+]
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = "z"
+strip = true
+# https://github.com/meta-rust/meta-rust/issues/343
+#panic = "abort"

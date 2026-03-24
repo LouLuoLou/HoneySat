@@ -1,0 +1,27 @@
+@if (link) {
+  <a class="ya-link" [routerLink]="link" [queryParams]="queryParams">
+    @if (icon) {
+      <mat-icon class="icon12 item" [class.with-label]="label">
+        {{ icon }}
+      </mat-icon>
+    }
+    @if (label) {
+      {{ label }}
+    }
+  </a>
+  <mat-icon class="icon12 sep">navigate_next</mat-icon>
+} @else if (action) {
+  <a class="ya-link action">
+    @if (icon) {
+      <mat-icon class="icon12 item" [class.with-label]="label">
+        {{ icon }}
+      </mat-icon>
+    }
+    @if (label) {
+      {{ label }}
+    }
+  </a>
+  <mat-icon class="icon12 sep">navigate_next</mat-icon>
+} @else {
+  {{ label }}
+}

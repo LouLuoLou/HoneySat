@@ -1,0 +1,12 @@
+td {
+  cursor: pointer;
+}
+
+.scrollpane {
+  overflow: auto;
+  height: 200px;
+}
+
+.filter-bar {
+  display: block;
+}

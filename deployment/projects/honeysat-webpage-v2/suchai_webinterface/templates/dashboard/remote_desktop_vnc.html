@@ -1,0 +1,34 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load static %}
+
+{% block id_for_selected_page %}id_nav_link_remote_desktop{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/vnc.css' %}">
+{% endblock %}
+
+{% block dashboard_content %}
+    <div class="row">
+        <div class="col-12">
+            <h3 class="my-4">Remote Desktop with noVNC</h3>
+            <iframe id="vnc-iframe" allowtransparency="true"
+                    src="" style="display: block;"></iframe>
+        </div>
+    </div>
+    <div class="row d-flex justify-content-center align-items-center">
+        <div class="col-12 d-flex justify-content-center">
+            <button id="fullscreen-btn" class="btn btn-primary my-4 align-content-center align-items-center"
+                    onclick="window.open('{{ vnc_url | safe }}','_blank')">Enter in Fullscreen Mode in new window
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Load iFrame on button click
+        document.addEventListener('DOMContentLoaded', function () {
+            let iframe = document.getElementById("vnc-iframe");
+            iframe.src = "{{ vnc_url | safe}}";
+            iframe.style.display = "block";
+        });
+    </script>
+{% endblock %}

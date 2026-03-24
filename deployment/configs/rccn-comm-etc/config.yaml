@@ -1,0 +1,42 @@
+frames:
+  spacecraft_id: 0xAB
+
+  in:
+    frame_kind: tc
+    transport:
+      kind: udp
+      listen: 0.0.0.0:10018
+
+  out:
+    frame_kind: uslp
+    transport:
+      kind: udp
+      send: yamcs:10017
+
+virtual_channels:
+  - id: 0
+    name: bus_realtime
+    splitter: space_packet
+
+    tx_transport:
+      kind: zenoh
+      key_pub: vc/bus_realtime/rx
+    rx_transport:
+      kind: zenoh
+      key_sub: vc/bus_realtime/tx
+
+  - id: 1
+    name: cfdp
+
+    rx_transport:
+      kind: udp
+      listen: 127.0.0.1:2000
+    tx_transport:
+      kind: udp
+      send: 127.0.0.1:3000
+
+  #- id: 2
+  #  name: bus_history
+  #  out_transport:
+  #    kind: ros2
+  #    action_srv: /vc/bus_history/downlink

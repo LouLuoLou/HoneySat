@@ -1,0 +1,113 @@
+<?xml version="1.0" ?>
+<!--
+This file was automatically generated with Yamcs PyMDB.
+See https://github.com/yamcs/pymdb
+-->
+<SpaceSystem xmlns="http://www.omg.org/spec/XTCE/20180204" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.omg.org/spec/XTCE/20180204 https://www.omg.org/spec/XTCE/20180204/SpaceSystem.xsd" name="SERVICE-EPS">
+  <TelemetryMetaData>
+    <ParameterTypeSet>
+      <IntegerParameterType name="EPS_CURRENT_IN" signed="true" sizeInBits="32">
+        <IntegerDataEncoding sizeInBits="32" encoding="twosComplement" byteOrder="mostSignificantByteFirst"/>
+      </IntegerParameterType>
+      <IntegerParameterType name="EPS_CURRENT_OUT" signed="true" sizeInBits="32">
+        <IntegerDataEncoding sizeInBits="32" encoding="twosComplement" byteOrder="mostSignificantByteFirst"/>
+      </IntegerParameterType>
+      <IntegerParameterType name="EPS_TEMPERATURE" signed="true" sizeInBits="32">
+        <IntegerDataEncoding sizeInBits="32" encoding="twosComplement" byteOrder="mostSignificantByteFirst"/>
+      </IntegerParameterType>
+      <IntegerParameterType name="EPS_VOLTAGE" signed="true" sizeInBits="32">
+        <IntegerDataEncoding sizeInBits="32" encoding="twosComplement" byteOrder="mostSignificantByteFirst"/>
+      </IntegerParameterType>
+    </ParameterTypeSet>
+    <ParameterSet>
+      <Parameter name="EPS_CURRENT_IN" parameterTypeRef="EPS_CURRENT_IN">
+        <ParameterProperties dataSource="telemetered" persistence="true"/>
+      </Parameter>
+      <Parameter name="EPS_CURRENT_OUT" parameterTypeRef="EPS_CURRENT_OUT">
+        <ParameterProperties dataSource="telemetered" persistence="true"/>
+      </Parameter>
+      <Parameter name="EPS_TEMPERATURE" parameterTypeRef="EPS_TEMPERATURE">
+        <ParameterProperties dataSource="telemetered" persistence="true"/>
+      </Parameter>
+      <Parameter name="EPS_VOLTAGE" parameterTypeRef="EPS_VOLTAGE">
+        <ParameterProperties dataSource="telemetered" persistence="true"/>
+      </Parameter>
+    </ParameterSet>
+    <ContainerSet>
+      <SequenceContainer name="EPSTelemetry" abstract="false">
+        <EntryList>
+          <ParameterRefEntry parameterRef="EPS_VOLTAGE">
+            <LocationInContainerInBits referenceLocation="previousEntry">
+              <FixedValue>0</FixedValue>
+            </LocationInContainerInBits>
+          </ParameterRefEntry>
+          <ParameterRefEntry parameterRef="EPS_CURRENT_IN">
+            <LocationInContainerInBits referenceLocation="previousEntry">
+              <FixedValue>0</FixedValue>
+            </LocationInContainerInBits>
+          </ParameterRefEntry>
+          <ParameterRefEntry parameterRef="EPS_CURRENT_OUT">
+            <LocationInContainerInBits referenceLocation="previousEntry">
+              <FixedValue>0</FixedValue>
+            </LocationInContainerInBits>
+          </ParameterRefEntry>
+          <ParameterRefEntry parameterRef="EPS_TEMPERATURE">
+            <LocationInContainerInBits referenceLocation="previousEntry">
+              <FixedValue>0</FixedValue>
+            </LocationInContainerInBits>
+          </ParameterRefEntry>
+        </EntryList>
+        <BaseContainer containerRef="/PUS/pus-tm">
+          <RestrictionCriteria>
+            <BooleanExpression>
+              <ANDedConditions>
+                <Condition>
+                  <ParameterInstanceRef parameterRef="/PUS/pus-tm/type" useCalibratedValue="true"/>
+                  <ComparisonOperator>==</ComparisonOperator>
+                  <Value>132</Value>
+                </Condition>
+                <Condition>
+                  <ParameterInstanceRef parameterRef="/PUS/pus-tm/subtype" useCalibratedValue="true"/>
+                  <ComparisonOperator>==</ComparisonOperator>
+                  <Value>0</Value>
+                </Condition>
+              </ANDedConditions>
+            </BooleanExpression>
+          </RestrictionCriteria>
+        </BaseContainer>
+      </SequenceContainer>
+    </ContainerSet>
+  </TelemetryMetaData>
+  <CommandMetaData>
+    <MetaCommandSet>
+      <MetaCommand name="FetchEPSData" abstract="false">
+        <BaseMetaCommand metaCommandRef="base">
+          <ArgumentAssignmentList>
+            <ArgumentAssignment argumentName="subtype" argumentValue="1"/>
+            <ArgumentAssignment argumentName="apid" argumentValue="42"/>
+          </ArgumentAssignmentList>
+        </BaseMetaCommand>
+        <CommandContainer name="FetchEPSData">
+          <EntryList/>
+          <BaseContainer containerRef="base"/>
+        </CommandContainer>
+        <DefaultSignificance consequenceLevel="normal"/>
+        <VerifierSet/>
+      </MetaCommand>
+      <MetaCommand name="base" abstract="true">
+        <BaseMetaCommand metaCommandRef="/PUS/pus-tc">
+          <ArgumentAssignmentList>
+            <ArgumentAssignment argumentName="type" argumentValue="132"/>
+          </ArgumentAssignmentList>
+        </BaseMetaCommand>
+        <CommandContainer name="base">
+          <EntryList/>
+          <BaseContainer containerRef="/PUS/pus-tc"/>
+        </CommandContainer>
+        <DefaultSignificance consequenceLevel="normal"/>
+        <VerifierSet/>
+      </MetaCommand>
+    </MetaCommandSet>
+  </CommandMetaData>
+</SpaceSystem>
+

@@ -1,0 +1,128 @@
+@if (controlName$ | async; as controlName) {
+  <ng-container [formGroup]="formGroup">
+    @switch (parameter.type?.engType) {
+      @case ("enumeration") {
+        <label>
+          <div class="meta">
+            <div class="item">{{ parameter.type?.engType }}</div>
+          </div>
+          {{ parameter.name }}
+          <ya-errors [controlName]="controlName" />
+          <select [formControlName]="controlName">
+            <option hidden disabled selected value>-- select an option --</option>
+            @for (enumValue of parameter.type?.enumValue; track enumValue) {
+              <option [value]="enumValue.label">
+                {{ enumValue.label }}
+              </option>
+            }
+          </select>
+        </label>
+      }
+      @case ("boolean") {
+        <label>
+          {{ parameter.name }}
+          <ya-errors [controlName]="controlName" />
+          <br />
+          <input type="radio" [formControlName]="controlName" value="true" /> true<br />
+          <input type="radio" [formControlName]="controlName" value="false" /> false
+        </label>
+      }
+      @case ("time") {
+        <label>
+          {{ parameter.name }}
+          <ya-errors [controlName]="controlName" />
+          <ya-date-time-input [formControlName]="controlName" />
+        </label>
+      }
+      @case ("binary") {
+        <label>
+          <div class="meta">
+            <div class="item" [class.error]="err.invalid$ | async">
+              {{ parameter.type?.engType }}
+            </div>
+          </div>
+          {{ parameter.name }}
+          <ya-errors #err [controlName]="controlName" />
+          <ya-binary-input [formControlName]="controlName" />
+        </label>
+      }
+      @case ("aggregate") {
+        <label>
+          <div class="meta">
+            <div class="item">{{ parameter.type?.engType }}</div>
+          </div>
+          {{ parameter.name }}
+          <div class="members">
+            @for (member of parameter.type?.member; track member) {
+              <app-parameter-form
+                [parameter]="member"
+                [formGroup]="formGroup"
+                [parent]="parent ? parent + '.' + parameter.name : parameter.name" />
+              <br />
+            }
+          </div>
+        </label>
+      }
+      @case ("integer") {
+        <div class="label">
+          <div class="meta" [class.error]="err.invalid$ | async">
+            @if (parameter.type?.unitSet) {
+              <div class="item">
+                {{ parameter.type?.unitSet | units }}
+              </div>
+            }
+            @if (parameter.type?.signed === false) {
+              <div class="item">unsigned</div>
+            }
+            <div class="item">{{ parameter.type?.engType }}</div>
+          </div>
+          {{ parameter.name }}
+          <ya-errors #err [controlName]="controlName" />
+          <input type="text" [formControlName]="controlName" />
+        </div>
+      }
+      @case ("float[]") {
+        Setting array values via this website is not yet supported.
+      }
+      @case ("double[]") {
+        Setting array values via this website is not yet supported.
+      }
+      @case ("integer[]") {
+        Setting array values via this website is not yet supported.
+      }
+      @case ("enumeration[]") {
+        Setting array values via this website is not yet supported.
+      }
+      @case ("string[]") {
+        Setting array values via this website is not yet supported.
+      }
+      @case ("boolean[]") {
+        Setting array values via this website is not yet supported.
+      }
+      @case ("time[]") {
+        Setting array values via this website is not yet supported.
+      }
+      @case ("binary[]") {
+        Setting array values via this website is not yet supported.
+      }
+      @case ("aggregate[]") {
+        Setting array values via this website is not yet supported.
+      }
+      @default {
+        <label>
+          <div class="meta" [class.error]="err.invalid$ | async">
+            @if (parameter.type?.unitSet) {
+              <div class="item">
+                {{ parameter.type?.unitSet | units }}
+              </div>
+            }
+            <div class="item">{{ parameter.type?.engType }}</div>
+          </div>
+          {{ parameter.name }}
+          <ya-errors #err [controlName]="controlName" />
+          <input type="text" [formControlName]="controlName" />
+        </label>
+      }
+    }
+  </ng-container>
+}

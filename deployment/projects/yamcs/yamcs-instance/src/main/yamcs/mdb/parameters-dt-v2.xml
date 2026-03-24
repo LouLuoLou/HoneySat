@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SpaceSystem name="parameters-dt" xmlns="http://www.omg.org/spec/XTCE/20180204/SpaceSystem.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    shortDescription="Parameter data type definitions."
+    operationalStatus="unittest">
+
+    <CommandMetaData>
+        <ArgumentTypeSet>
+                        <!-- writeable floats -->
+            <EnumeratedArgumentType name="param_hash_float_writeable_type">
+                <IntegerDataEncoding sizeInBits="32" />
+                <EnumerationList>
+                    <Enumeration value="2707609125" label="cpu0_temp" />
+                    <Enumeration value="215623033" label="cpu1_temp" />
+                    <Enumeration value="2771989817" label="sdr_rx_temp" />
+                    <Enumeration value="2250266379" label="sdr_tx_temp" />
+                </EnumerationList>
+            </EnumeratedArgumentType>
+                        <!-- writeable signed integers -->
+            <EnumeratedArgumentType name="param_hash_int_writeable_type">
+                <IntegerDataEncoding sizeInBits="32" />
+                <EnumerationList>
+                </EnumerationList>
+            </EnumeratedArgumentType>
+                        <!-- writeable unsigned integers -->
+            <EnumeratedArgumentType name="param_hash_uint_writeable_type">
+                <IntegerDataEncoding sizeInBits="32" />
+                <EnumerationList>
+                </EnumerationList>
+            </EnumeratedArgumentType>
+                        <!-- all parameters -->
+            <EnumeratedArgumentType name="param_hash_type">
+                <IntegerDataEncoding sizeInBits="32" />
+                <EnumerationList>
+                    <Enumeration value="2707609125" label="cpu0_temp" />
+                    <Enumeration value="215623033" label="cpu1_temp" />
+                    <Enumeration value="2771989817" label="sdr_rx_temp" />
+                    <Enumeration value="2250266379" label="sdr_tx_temp" />
+                </EnumerationList>
+            </EnumeratedArgumentType>
+
+
+            <!-- types used for TC(20,x) -->
+            <IntegerArgumentType name="number_of_parameters_type">
+                <IntegerDataEncoding sizeInBits="16" />
+            </IntegerArgumentType>
+
+            <ArrayArgumentType arrayTypeRef="param_hash_type" name="param_hash_array_type">
+                <DimensionList><Dimension>
+                    <StartingIndex><FixedValue>0</FixedValue></StartingIndex>
+                    <EndingIndex><DynamicValue>
+                        <ArgumentInstanceRef argumentRef="number_of_parameters" />
+                        <LinearAdjustment intercept="-1" />
+                    </DynamicValue></EndingIndex>
+                </Dimension></DimensionList>
+            </ArrayArgumentType>
+
+            <!-- argument types for setting parameters -->
+
+            <IntegerArgumentType name="int_value_type" sizeInBits="64" signed="true">
+                <IntegerDataEncoding sizeInBits="64" />
+            </IntegerArgumentType>
+            <IntegerArgumentType name="uint_value_type" sizeInBits="64" signed="false">
+                <IntegerDataEncoding sizeInBits="64" encoding="unsigned" />
+            </IntegerArgumentType>
+            <FloatArgumentType name="float_value_type" sizeInBits="64">
+                <FloatDataEncoding sizeInBits="64" />
+            </FloatArgumentType>
+
+
+                        <!-- writeable floats -->
+            <AggregateArgumentType name="param_hash_float_value_pair_type">
+                <MemberList>
+                    <Member typeRef="param_hash_float_writeable_type" name="param_hash" />
+                    <Member typeRef="float_value_type" name="value" />
+                </MemberList>
+            </AggregateArgumentType>
+            <ArrayArgumentType arrayTypeRef="param_hash_float_value_pair_type" name="param_hash_float_value_pair_array_type">
+                <DimensionList><Dimension>
+                    <StartingIndex><FixedValue>0</FixedValue></StartingIndex>
+                    <EndingIndex><DynamicValue>
+                        <ArgumentInstanceRef argumentRef="number_of_parameters" />
+                        <LinearAdjustment intercept="-1" />
+                    </DynamicValue></EndingIndex>
+                </Dimension></DimensionList>
+            </ArrayArgumentType>
+                        <!-- writeable signed integers -->
+            <AggregateArgumentType name="param_hash_int_value_pair_type">
+                <MemberList>
+                    <Member typeRef="param_hash_int_writeable_type" name="param_hash" />
+                    <Member typeRef="int_value_type" name="value" />
+                </MemberList>
+            </AggregateArgumentType>
+            <ArrayArgumentType arrayTypeRef="param_hash_int_value_pair_type" name="param_hash_int_value_pair_array_type">
+                <DimensionList><Dimension>
+                    <StartingIndex><FixedValue>0</FixedValue></StartingIndex>
+                    <EndingIndex><DynamicValue>
+                        <ArgumentInstanceRef argumentRef="number_of_parameters" />
+                        <LinearAdjustment intercept="-1" />
+                    </DynamicValue></EndingIndex>
+                </Dimension></DimensionList>
+            </ArrayArgumentType>
+                        <!-- writeable unsigned integers -->
+            <AggregateArgumentType name="param_hash_uint_value_pair_type">
+                <MemberList>
+                    <Member typeRef="param_hash_uint_writeable_type" name="param_hash" />
+                    <Member typeRef="uint_value_type" name="value" />
+                </MemberList>
+            </AggregateArgumentType>
+            <ArrayArgumentType arrayTypeRef="param_hash_uint_value_pair_type" name="param_hash_uint_value_pair_array_type">
+                <DimensionList><Dimension>
+                    <StartingIndex><FixedValue>0</FixedValue></StartingIndex>
+                    <EndingIndex><DynamicValue>
+                        <ArgumentInstanceRef argumentRef="number_of_parameters" />
+                        <LinearAdjustment intercept="-1" />
+                    </DynamicValue></EndingIndex>
+                </Dimension></DimensionList>
+            </ArrayArgumentType>
+
+
+        </ArgumentTypeSet>
+
+        <MetaCommandSet>
+            <MetaCommand name="TC(20,1)_report_parameter_values">
+                <BaseMetaCommand metaCommandRef="/PUS/pus-tc">
+                    <ArgumentAssignmentList>
+                        <ArgumentAssignment argumentName="type" argumentValue="20" />
+                        <ArgumentAssignment argumentName="subtype" argumentValue="1" />
+                    </ArgumentAssignmentList>
+                </BaseMetaCommand>
+                <ArgumentList>
+                    <Argument argumentTypeRef="number_of_parameters_type" name="number_of_parameters" />
+                    <Argument argumentTypeRef="param_hash_array_type" name="parameters" />
+                </ArgumentList>
+                <CommandContainer name="TC(20_1)_report_parameter_values_container">
+                    <EntryList>
+                        <ArgumentRefEntry argumentRef="number_of_parameters" />
+                        <ArgumentRefEntry argumentRef="parameters" />
+                    </EntryList>
+                    <BaseContainer containerRef="/PUS/pus-tc" />
+                </CommandContainer>
+            </MetaCommand>
+
+
+                    <!-- writeable floats -->
+        <MetaCommand name="TC(20,3)_set_parameter_values_float">
+            <BaseMetaCommand metaCommandRef="/PUS/pus-tc">
+                <ArgumentAssignmentList>
+                    <ArgumentAssignment argumentName="type" argumentValue="20" />
+                    <ArgumentAssignment argumentName="subtype" argumentValue="3" />
+                </ArgumentAssignmentList>
+            </BaseMetaCommand>
+            <ArgumentList>
+                <Argument argumentTypeRef="number_of_parameters_type" name="number_of_parameters" />
+                <Argument argumentTypeRef="param_hash_float_value_pair_array_type" name="parameters" />
+            </ArgumentList>
+            <CommandContainer name="TC(20_3)_set_parameter_values_float_container">
+                <EntryList>
+                    <ArgumentRefEntry argumentRef="number_of_parameters" />
+                    <ArgumentRefEntry argumentRef="parameters" />
+                </EntryList>
+                <BaseContainer containerRef="/PUS/pus-tc" />
+            </CommandContainer>
+        </MetaCommand>
+                    <!-- writeable signed integers -->
+        <MetaCommand name="TC(20,3)_set_parameter_values_int">
+            <BaseMetaCommand metaCommandRef="/PUS/pus-tc">
+                <ArgumentAssignmentList>
+                    <ArgumentAssignment argumentName="type" argumentValue="20" />
+                    <ArgumentAssignment argumentName="subtype" argumentValue="3" />
+                </ArgumentAssignmentList>
+            </BaseMetaCommand>
+            <ArgumentList>
+                <Argument argumentTypeRef="number_of_parameters_type" name="number_of_parameters" />
+                <Argument argumentTypeRef="param_hash_int_value_pair_array_type" name="parameters" />
+            </ArgumentList>
+            <CommandContainer name="TC(20_3)_set_parameter_values_int_container">
+                <EntryList>
+                    <ArgumentRefEntry argumentRef="number_of_parameters" />
+                    <ArgumentRefEntry argumentRef="parameters" />
+                </EntryList>
+                <BaseContainer containerRef="/PUS/pus-tc" />
+            </CommandContainer>
+        </MetaCommand>
+                    <!-- writeable unsigned integers -->
+        <MetaCommand name="TC(20,3)_set_parameter_values_uint">
+            <BaseMetaCommand metaCommandRef="/PUS/pus-tc">
+                <ArgumentAssignmentList>
+                    <ArgumentAssignment argumentName="type" argumentValue="20" />
+                    <ArgumentAssignment argumentName="subtype" argumentValue="3" />
+                </ArgumentAssignmentList>
+            </BaseMetaCommand>
+            <ArgumentList>
+                <Argument argumentTypeRef="number_of_parameters_type" name="number_of_parameters" />
+                <Argument argumentTypeRef="param_hash_uint_value_pair_array_type" name="parameters" />
+            </ArgumentList>
+            <CommandContainer name="TC(20_3)_set_parameter_values_uint_container">
+                <EntryList>
+                    <ArgumentRefEntry argumentRef="number_of_parameters" />
+                    <ArgumentRefEntry argumentRef="parameters" />
+                </EntryList>
+                <BaseContainer containerRef="/PUS/pus-tc" />
+            </CommandContainer>
+        </MetaCommand>
+
+
+
+        </MetaCommandSet>
+
+    </CommandMetaData>
+
+    <TelemetryMetaData>
+        <ParameterTypeSet>
+            <IntegerParameterType name="param_hash_type" signed="false">
+                <IntegerDataEncoding sizeInBits="32" encoding="unsigned" />
+            </IntegerParameterType>
+
+            <!-- parameter datatypes -->
+            <FloatParameterType name="cpu0_temp_type">
+                <FloatDataEncoding sizeInBits="32" />
+                <!-- todo add min and max -->
+            </FloatParameterType>
+            <FloatParameterType name="cpu1_temp_type">
+                <FloatDataEncoding sizeInBits="32" />
+                <!-- todo add min and max -->
+            </FloatParameterType>
+            <FloatParameterType name="sdr_rx_temp_type">
+                <FloatDataEncoding sizeInBits="32" />
+                <!-- todo add min and max -->
+            </FloatParameterType>
+            <FloatParameterType name="sdr_tx_temp_type">
+                <FloatDataEncoding sizeInBits="32" />
+                <!-- todo add min and max -->
+            </FloatParameterType>
+
+            <!-- parameter types used in TM(20, 2) -->
+            <IntegerParameterType name="number_of_parameters_type">
+                <IntegerDataEncoding sizeInBits="16" />
+            </IntegerParameterType>
+
+        </ParameterTypeSet>
+
+        <ParameterSet>
+            <Parameter parameterTypeRef="param_hash_type" name="param_hash" />
+            <Parameter parameterTypeRef="cpu0_temp_type" name="cpu0_temp">
+                <AliasSet>
+                    <Alias nameSpace="onboard-parameter-hash" alias="2707609125" />
+                </AliasSet>
+            </Parameter>
+            <Parameter parameterTypeRef="cpu1_temp_type" name="cpu1_temp">
+                <AliasSet>
+                    <Alias nameSpace="onboard-parameter-hash" alias="215623033" />
+                </AliasSet>
+            </Parameter>
+            <Parameter parameterTypeRef="sdr_rx_temp_type" name="sdr_rx_temp">
+                <AliasSet>
+                    <Alias nameSpace="onboard-parameter-hash" alias="2771989817" />
+                </AliasSet>
+            </Parameter>
+            <Parameter parameterTypeRef="sdr_tx_temp_type" name="sdr_tx_temp">
+                <AliasSet>
+                    <Alias nameSpace="onboard-parameter-hash" alias="2250266379" />
+                </AliasSet>
+            </Parameter>
+
+            <!-- parameters used in TM(20, 2) -->
+            <Parameter parameterTypeRef="number_of_parameters_type" name="number_of_parameters" />
+        </ParameterSet>
+
+        <ContainerSet>
+            <SequenceContainer name="param_hash_value_pair">
+                <EntryList>
+                    <ParameterRefEntry parameterRef="param_hash" />
+                    <IndirectParameterRefEntry aliasNameSpace="onboard-parameter-hash">
+                        <ParameterInstance parameterRef="param_hash" />
+                    </IndirectParameterRefEntry>
+                </EntryList>
+            </SequenceContainer>
+
+            <SequenceContainer name="TM(20,2)_parameter_value_report">
+                <EntryList>
+                    <ParameterRefEntry parameterRef="number_of_parameters" />
+                    <ContainerRefEntry containerRef="param_hash_value_pair">
+                        <RepeatEntry>
+                            <Count><DynamicValue><ParameterInstanceRef parameterRef="number_of_parameters" /></DynamicValue></Count>
+                        </RepeatEntry>
+                    </ContainerRefEntry>
+                </EntryList>
+                <BaseContainer containerRef="/PUS/pus-tm">
+                    <RestrictionCriteria><ComparisonList>
+                        <Comparison parameterRef="/PUS/type" value="20" />
+                        <Comparison parameterRef="/PUS/subtype" value="2" />
+                    </ComparisonList></RestrictionCriteria>
+                </BaseContainer>
+            </SequenceContainer>
+        </ContainerSet>
+    </TelemetryMetaData>
+</SpaceSystem>

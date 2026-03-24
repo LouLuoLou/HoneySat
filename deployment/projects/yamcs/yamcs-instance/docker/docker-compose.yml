@@ -1,0 +1,60 @@
+
+services:
+  yamcs:
+    build: 
+     context: ..
+     dockerfile: ./docker/Dockerfile
+    hostname: yamcs
+    container_name: yamcs
+    command: "./mvnw yamcs:run"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    volumes:
+      - ../:/yamcs
+    ports:
+      - "8090:8090"
+      - "10015:10015/udp"
+    #expose:
+      - "8059:8059"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - quickstart
+    environment:
+      - role=raccoon_main
+      # - role=${YAMCS_INSTANCE_ROLE}
+  yamcs_server:
+    build: 
+     context: ..
+     dockerfile: ./docker/Dockerfile
+    hostname: yamcs_server
+    container_name: yamcs_server
+    command: "./mvnw yamcs:run"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    volumes:
+      - ../:/yamcs
+    ports:
+      - "8090:8090"
+      - "10015:10015/udp"
+    #expose:
+      - "8059:8059"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - quickstart
+    environment:
+      - role=raccoon_client
+      # - role=${YAMCS_INSTANCE_ROLE}
+    restart: "unless-stopped"
+networks:
+  quickstart:
+    driver: bridge

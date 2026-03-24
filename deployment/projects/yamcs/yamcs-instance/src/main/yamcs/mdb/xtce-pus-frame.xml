@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SpaceSystem 
+    name="PUS" 
+    xmlns="http://www.omg.org/spec/XTCE/20180204" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://www.omg.org/spec/XTCE/20180204 https://www.omg.org/spec/XTCE/20180204/SpaceSystem.xsd">
+
+    <TelemetryMetaData>
+    </TelemetryMetaData>
+
+    <CommandMetaData>
+        <ArgumentTypeSet>
+            <IntegerArgumentType name="uint4_t" signed="false">
+				<IntegerDataEncoding sizeInBits="4" />
+            </IntegerArgumentType>
+            <IntegerArgumentType name="uint8_t" signed="false">
+				<IntegerDataEncoding encoding="unsigned" sizeInBits="8" />
+            </IntegerArgumentType>
+            <IntegerArgumentType name="uint16_t" signed="false">
+				<IntegerDataEncoding encoding="unsigned" sizeInBits="16" />
+            </IntegerArgumentType>
+            <IntegerArgumentType name="packet_version_number">
+				<IntegerDataEncoding sizeInBits="3" />
+			</IntegerArgumentType>
+			<EnumeratedArgumentType name="packet_type">
+				<IntegerDataEncoding sizeInBits="1" />
+				<EnumerationList>
+					<Enumeration value="1" label="TC" />
+					<Enumeration value="0" label="TM" />
+				</EnumerationList>
+			</EnumeratedArgumentType>
+			<IntegerArgumentType name="secondary_header_flag">
+				<IntegerDataEncoding sizeInBits="1" />
+			</IntegerArgumentType>
+			<EnumeratedArgumentType name="application_process_ID">
+				<IntegerDataEncoding encoding="unsigned" sizeInBits="11" />
+
+				<EnumerationList>
+					<Enumeration value="1" label="OBC" />
+					<Enumeration value="2" label="COMMS" />
+					<Enumeration value="3" label="ADCS" />
+					<Enumeration value="4" label="SU" />
+					<Enumeration value="5" label="GS" />
+				</EnumerationList>
+			</EnumeratedArgumentType>
+			<IntegerArgumentType name="sequence_flags">
+				<IntegerDataEncoding sizeInBits="2" />
+			</IntegerArgumentType>
+			<EnumeratedArgumentType name="completion_ack">
+				<IntegerDataEncoding sizeInBits="1" />
+				<EnumerationList>
+					<Enumeration value="0" label="no_ack" />
+					<Enumeration value="1" label="completion_ack" />
+				</EnumerationList>
+			</EnumeratedArgumentType>
+			<EnumeratedArgumentType name="progress_of_execution_ack">
+				<IntegerDataEncoding sizeInBits="1" />
+				<EnumerationList>
+					<Enumeration value="0" label="no_ack" />
+					<Enumeration value="1" label="progress_of_execution_ack" />
+				</EnumerationList>
+			</EnumeratedArgumentType>
+			<EnumeratedArgumentType name="start_of_execution_ack">
+				<IntegerDataEncoding sizeInBits="1" />
+				<EnumerationList>
+					<Enumeration value="0" label="no_ack" />
+					<Enumeration value="1" label="start_of_execution_ack" />
+				</EnumerationList>
+			</EnumeratedArgumentType>
+			<EnumeratedArgumentType name="acceptance_ack">
+				<IntegerDataEncoding sizeInBits="1" />
+				<EnumerationList>
+					<Enumeration value="0" label="no_ack" />
+					<Enumeration value="1" label="acceptance_ack" />
+				</EnumerationList>
+			</EnumeratedArgumentType>
+        </ArgumentTypeSet>
+        <MetaCommandSet>
+            <MetaCommand name="PUS_Telecommand" abstract="true">
+                <BaseMetaCommand metaCommandRef="/CCSDS/CCSDSPacket">
+                    <ArgumentAssignmentList>
+                        <ArgumentAssignment argumentName="/CCSDS/CCSDS_Version" argumentValue="0" />
+                        <ArgumentAssignment argumentName="/CCSDS/CCSDS_Type" argumentValue="TC" />
+                        <ArgumentAssignment argumentName="/CCSDS/CCSDS_Sec_Hdr_Flag" argumentValue="1" />
+                        <ArgumentAssignment argumentName="/CCSDS/CCSDS_Group_Flags" argumentValue="Standalone" />
+                    </ArgumentAssignmentList>
+                </BaseMetaCommand>
+                <ArgumentList>
+                    <Argument argumentTypeRef="/PUS/completion_ack" name="completion_ack" initialValue="completion_ack" />
+                    <Argument argumentTypeRef="/PUS/progress_of_execution_ack" name="progress_of_execution_ack" initialValue="progress_of_execution_ack" />
+                    <Argument argumentTypeRef="/PUS/start_of_execution_ack" name="start_of_execution_ack" initialValue="start_of_execution_ack" />
+                    <Argument argumentTypeRef="/PUS/acceptance_ack" name="acceptance_ack" initialValue="acceptance_ack" />
+                    <Argument argumentTypeRef="/PUS/uint8_t" name="service_type_ID" />
+                    <Argument argumentTypeRef="/PUS/uint8_t" name="message_subtype_ID" />
+                    <Argument argumentTypeRef="/PUS/uint16_t" name="source_ID" />
+                </ArgumentList>
+                <CommandContainer name="PUS_Telecommand">
+                    <BaseContainer containerRef="/CCSDS/CCSDSPacket" />
+                    <EntryList>
+						<FixedValueEntry name="PUS_version_number" binaryValue="2" sizeInBits="4" />
+                        <ArgumentRefEntry argumentRef="completion_ack" />
+                        <ArgumentRefEntry argumentRef="progress_of_execution_ack" />
+                        <ArgumentRefEntry argumentRef="start_of_execution_ack" />
+                        <ArgumentRefEntry argumentRef="acceptance_ack" />
+                        <ArgumentRefEntry argumentRef="service_type_ID" />
+                        <ArgumentRefEntry argumentRef="message_subtype_ID" />
+                        <ArgumentRefEntry argumentRef="source_ID" />
+                    </EntryList>
+                </CommandContainer>
+            </MetaCommand>
+
+            <MetaCommand name="FlipTheSwitch">
+                <BaseMetaCommand metaCommandRef="/PUS/PUS_Telecommand">
+                    <!--<ArgumentAssignmentList>
+                        <ArgumentAssignment argumentName="service_type_ID" argumentValue="42" />
+                        <ArgumentAssignment argumentName="message_subtype_ID" argumentValue="1" />
+                    </ArgumentAssignmentList>-->
+                </BaseMetaCommand>
+                <ArgumentList>
+                    <Argument argumentTypeRef="/PUS/uint8_t" name="whichSwitch" />
+                </ArgumentList>
+                <CommandContainer name="FlipTheSwitch_Container">
+                    <BaseContainer containerRef="PUS_Telecommand" />
+                    <EntryList>
+                        <ArgumentRefEntry argumentRef="whichSwitch" />
+                    </EntryList>
+                </CommandContainer>
+            </MetaCommand>
+
+        </MetaCommandSet>
+    </CommandMetaData>
+
+</SpaceSystem>

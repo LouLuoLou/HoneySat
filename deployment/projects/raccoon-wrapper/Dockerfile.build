@@ -1,0 +1,30 @@
+FROM docker.io/rccn/usr-dev AS build
+
+ARG USERNAME=rosdev
+ARG WS=/home/rosdev/ros2_ws
+
+# Switch to user
+USER $USERNAME
+RUN mkdir -p $WS/src
+WORKDIR $WS
+
+# Copy source
+COPY --chown=$USERNAME ./src $WS/src
+
+# Build workspace
+RUN . ~/.cargo/env && \
+    . /opt/ros/humble/setup.sh && \
+    . /home/rosdev/.venv/bin/activate && \
+    ~/.local/bin/uv pip install git+https://github.com/jdiez17/colcon-ros-cargo && \
+    colcon build \
+        --event-handlers console_direct+ \
+        --packages-up-to vacuum_test_node \
+	--cargo-args --verbose
+
+# Fix paths for deployment
+RUN sed -i "s@/home/rosdev/.venv/bin/python3@/usr/bin/env python@" $(find . -type f -wholename "./install*/lib/*") && \
+    sed -i "s@COLCON_CURRENT_PREFIX=\"/opt/ros/humble\"@COLCON_CURRENT_PREFIX=\"/usr/opt/ros/humble\"@" ./install/setup.sh
+
+# Create minimal output image
+FROM scratch
+COPY --from=build /home/rosdev/ros2_ws/install .

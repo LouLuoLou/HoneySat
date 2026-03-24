@@ -1,0 +1,24 @@
+[package]
+name = "rccn_usr"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+hs_zmq_interface = { version = "0.1.0", path = "../hs_zmq_interface" }
+futures = "0.3.31"
+crossbeam-channel = "0.5.8"
+async-std = "1.12.0"
+satrs = "0.2.1"
+thiserror = "1.0.65"
+serde_yaml = "0.9.34"
+serde = "1.0.214"
+paste = "1.0"
+spacepackets = "0.12.0"
+log = "0.4.22"
+zenoh = "1.0.3"
+tokio = "1.41.1"
+async-trait = "0.1.83"
+crossbeam = "0.8.4"
+rand = "0.9.2"
+xtce-rs = { git = "https://github.com/jdiez17/xtce-rs", branch = "bitbuffer_write_bits", version = "0.1.0" }
+rccn_usr_pus_macros = { version = "0.1.0", path = "../rccn_usr_pus_macros" }

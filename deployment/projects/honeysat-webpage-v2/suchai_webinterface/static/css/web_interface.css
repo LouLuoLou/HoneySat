@@ -1,0 +1,18 @@
+#satvis-frame {
+    display: none;
+    margin: auto;
+    width: 100%;
+    /*max-width: 800px;*/
+    height: 600px;
+    border: none;
+    border-radius: 5px;
+}
+
+#telnet-output-box {
+    height: 700px;
+    width: 100%;
+    border: 1px solid #ccc;
+    overflow-y: scroll;
+    background-color: #f8f9fa;
+    padding: 10px;
+}

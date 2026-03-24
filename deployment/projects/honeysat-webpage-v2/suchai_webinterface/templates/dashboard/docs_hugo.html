@@ -1,0 +1,7 @@
+{% extends "dashboard/dashboard_base.html" %}
+
+{% block id_for_selected_page %}id_nav_link_docs_hugo{% endblock %}
+
+{% block dashboard_content %}
+{{ docs_description | linebreaksbr }}
+{% endblock %}

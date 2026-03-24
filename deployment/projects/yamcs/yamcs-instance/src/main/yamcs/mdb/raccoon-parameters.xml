@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SpaceSystem name="ST20" xmlns="http://www.omg.org/spec/XTCE/20180204"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.omg.org/spec/XTCE/20180204 https://www.omg.org/spec/XTCE/20180204/SpaceSystem.xsd"
+    shortDescription="This is a bogus satellite telemetry and telecommand database."
+    operationalStatus="unittest">
+
+    <!-- Parameter Management Service (ST(20]) Set-Value Commands (TC(20,3]) of pre-made groups of
+    parameters based on their type-->
+    <CommandMetaData>
+        <ArgumentTypeSet>
+            <IntegerArgumentType name="N">
+                <IntegerDataEncoding sizeInBits="32" />
+            </IntegerArgumentType>
+            <IntegerArgumentType name="uint8_t">
+                <IntegerDataEncoding sizeInBits="8" />
+            </IntegerArgumentType>
+            <IntegerArgumentType name="uint32_t">
+                <IntegerDataEncoding sizeInBits="32" />
+            </IntegerArgumentType>
+
+            <EnumeratedArgumentType name="parameter_id">
+                <IntegerDataEncoding sizeInBits="32" />
+                <EnumerationList>
+                    <Enumeration value="1" label="FOO_uint8" />
+                    <Enumeration value="2" label="BAR_uint32" />
+                </EnumerationList>
+            </EnumeratedArgumentType>
+            <AggregateArgumentType name="parameter_id_value">
+                <MemberList>
+                    <Member typeRef="parameter_id" name="parameter_id" />
+                    <Member typeRef="uint8_t" name="value">
+                    </Member>
+                </MemberList>
+            </AggregateArgumentType>
+        </ArgumentTypeSet>
+        <MetaCommandSet>
+            <MetaCommand name="TC(20,3)_set_parameter_values">
+                <BaseMetaCommand metaCommandRef="/PUS/pus-tc">
+                    <ArgumentAssignmentList>
+                        <ArgumentAssignment argumentName="service_type_ID" argumentValue="20" />
+                        <ArgumentAssignment argumentName="message_subtype_ID" argumentValue="3" />
+                    </ArgumentAssignmentList>
+                </BaseMetaCommand>
+                <ArgumentList>
+                    <Argument argumentTypeRef="N" name="number_of_parameters" />
+                    <Argument argumentTypeRef="/writeable-dt/writableFloatParameterArray" name="parameter_ids_and_new_values" />
+                </ArgumentList>
+                <CommandContainer name="TC(20,3)_container">
+                    <EntryList>
+                        <ArgumentRefEntry argumentRef="number_of_parameters" />
+                        <ArgumentRefEntry argumentRef="parameter_ids_and_new_values" />
+                    </EntryList>
+                    <BaseContainer containerRef="/pus/Header_TC" />
+                </CommandContainer>
+            </MetaCommand>
+        </MetaCommandSet>
+    </CommandMetaData>
+</SpaceSystem>

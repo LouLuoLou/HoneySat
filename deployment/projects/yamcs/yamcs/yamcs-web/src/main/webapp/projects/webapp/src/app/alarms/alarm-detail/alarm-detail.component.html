@@ -1,0 +1,124 @@
+@if (alarm.type === "PARAMETER") {
+  <div class="block-title">Parameter</div>
+  <div class="block">
+    <a
+      [routerLink]="'/telemetry/parameters/' + alarm.id.namespace! + '/' + alarm.id.name"
+      [queryParams]="{ c: yamcs.context }"
+      class="ya-link">
+      {{ alarm.id.namespace }}/{{ alarm.id.name }}
+    </a>
+  </div>
+}
+
+@if (alarm.type === "EVENT") {
+  <div class="block-title">Event</div>
+  <div class="block">
+    @if (alarm.id.name) {
+      {{ alarm.id.namespace }}/{{ alarm.id.name }}
+    } @else {
+      {{ alarm.id.namespace }}
+    }
+  </div>
+}
+
+<div class="block-title">Severity</div>
+<div class="block">
+  <app-alarm-level [level]="alarm.severity" />
+  {{ alarm.severity }}
+</div>
+
+<div class="block-title">Violations</div>
+<div class="block">
+  {{ alarm.violations | number }}
+</div>
+
+@if (alarm.parameterDetail; as parameterDetail) {
+  <br />
+  <mat-divider />
+  <div class="block-title">Trigger value</div>
+  <div class="block">
+    <app-alarm-level [level]="alarm.severity" [grayscale]="true" />
+    &nbsp;{{ parameterDetail.triggerValue.engValue | value }}
+    @if (parameterDetail.triggerValue.rangeCondition === "LOW") {
+      <span>&#8595;</span>
+    }
+    @if (parameterDetail.triggerValue.rangeCondition === "HIGH") {
+      <span>&#8593;</span>
+    }
+  </div>
+  <br />
+  <mat-divider />
+  <div class="block-title">Live value</div>
+  <div class="block">
+    <ya-expirable [pval]="parameterDetail.currentValue">
+      <app-alarm-level [level]="parameterDetail.currentValue.monitoringResult" [grayscale]="true" />
+      &nbsp;{{ parameterDetail.currentValue.engValue | value }}
+      @if (parameterDetail.currentValue.rangeCondition === "LOW") {
+        <span>&#8595;</span>
+      }
+      @if (parameterDetail.currentValue.rangeCondition === "HIGH") {
+        <span>&#8593;</span>
+      }
+    </ya-expirable>
+  </div>
+}
+
+@if (alarm.eventDetail; as eventDetail) {
+  <br />
+  <mat-divider />
+  <div class="block-title">Trigger event</div>
+  <div class="block">
+    {{ eventDetail.triggerEvent.message }}
+  </div>
+}
+
+@if (alarm.acknowledgeInfo) {
+  <br />
+  <mat-divider />
+  <div class="block-title">Acknowledged by {{ alarm.acknowledgeInfo.acknowledgedBy }}</div>
+  <div class="block">
+    On {{ alarm.acknowledgeInfo.acknowledgeTime | datetime }}
+    @if (alarm.acknowledgeInfo.acknowledgeMessage) {
+      <blockquote style="border-left: 4px solid #eee; padding-left: 1em; font-style: italic">
+        {{ alarm.acknowledgeInfo.acknowledgeMessage }}
+      </blockquote>
+    }
+  </div>
+}
+
+@if (alarm.shelveInfo) {
+  <br />
+  <mat-divider />
+  <div class="block-title">Shelved by {{ alarm.shelveInfo.shelvedBy }}</div>
+  <div class="block">
+    On {{ alarm.shelveInfo.shelveTime | datetime }}
+    @if (alarm.shelveInfo.shelveMessage) {
+      <blockquote style="border-left: 4px solid #eee; padding-left: 1em; font-style: italic">
+        {{ alarm.shelveInfo.shelveMessage }}
+      </blockquote>
+    }
+  </div>
+  @if (alarm.shelveInfo.shelveExpiration) {
+    <div class="block-title">Shelve expiration</div>
+    <div class="block">
+      {{ alarm.shelveInfo.shelveExpiration | datetime }}
+    </div>
+  }
+}
+
+@if (mayControl) {
+  <div class="action-bar">
+    @if (!alarm.shelveInfo && !alarm.acknowledged) {
+      <ya-button (click)="acknowledgeAlarm.emit(alarm)" icon="notifications_off">
+        ACKNOWLEDGE
+      </ya-button>
+    }
+    @if (!alarm.shelveInfo) {
+      <ya-button (click)="shelveAlarm.emit(alarm)" icon="timer">SHELVE</ya-button>
+    }
+    @if (alarm.shelveInfo) {
+      <ya-button (click)="unshelveAlarm.emit(alarm)" icon="timer_off">UNSHELVE</ya-button>
+    }
+    <ya-button (click)="clearAlarm.emit(alarm)" icon="clear_all">CLEAR</ya-button>
+  </div>
+}

@@ -1,0 +1,17 @@
+1: com_ping 10
+
+fp_set_cmd 07 07 2026 14 40 00 1 0 com_ping 1
+fp_set_cmd 07 07 2026 14 44 00 1 0 com_ping 1
+fp_show
+
+1: sen_get_eps
+1: tm_send_last 2 10
+tm_get_last 2
+
+1: sen_get_temp
+1: tm_send_last 0 10
+tm_get_last 0
+
+1: sen_get_adcs
+1: tm_send_last 1 10
+tm_get_last 1

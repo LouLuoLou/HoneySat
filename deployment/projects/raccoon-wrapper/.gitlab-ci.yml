@@ -1,0 +1,41 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+default:
+  after_script:
+    - podman unshare rm -rf build install log target
+
+workspace-x86:
+  stage: build
+  script:
+    - |
+      ./container.sh \
+        --engine=podman \
+        ./build.sh
+
+    #- ./scripts/ostree-push.sh linux/amd64 $CI_COMMIT_REF_NAME
+
+    - mkdir out
+    - cp -r install/* out
+
+  artifacts:
+    paths:
+      - out/
+
+workspace-arm64:
+  stage: build
+  script:
+    - |
+      ./container.sh \
+        --engine=podman \
+        --image=docker.io/rccn/usr-cross-compile \
+        ./cross-build.sh
+
+    - mkdir out
+    - cp -r install/target/* out
+
+    #- ./scripts/ostree-push.sh $PLATFORM $CI_COMMIT_REF_NAME
+
+  artifacts:
+    paths:
+      - out/

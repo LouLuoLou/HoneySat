@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SpaceSystem name="parameters-dt" xmlns="http://www.omg.org/spec/XTCE/20180204"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.omg.org/spec/XTCE/20180204 https://www.omg.org/spec/XTCE/20180204/SpaceSystem.xsd"
+    shortDescription="Parameter data type definitions."
+    operationalStatus="unittest">
+
+    <CommandMetaData>
+        <ArgumentTypeSet>
+
+                        <!-- writeable floats -->
+            <EnumeratedArgumentType name="param_hash_float_writeable_type">
+                <IntegerDataEncoding sizeInBits="32" />
+                <EnumerationList>
+                    <Enumeration value="2837432348" label="voltage_threshold" />
+                </EnumerationList>
+            </EnumeratedArgumentType>
+                        
+                        <!-- writeable signed integers -->
+            <EnumeratedArgumentType name="param_hash_int_writeable_type">
+                <IntegerDataEncoding sizeInBits="32" />
+                <EnumerationList>
+                </EnumerationList>
+            </EnumeratedArgumentType>
+                        
+                        <!-- writeable unsigned integers -->
+            <EnumeratedArgumentType name="param_hash_uint_writeable_type">
+                <IntegerDataEncoding sizeInBits="32" />
+                <EnumerationList>
+                    <Enumeration value="2826980114" label="magic_number" />
+                    <Enumeration value="3378179374" label="disk_free" />
+                </EnumerationList>
+            </EnumeratedArgumentType>
+
+                        <!-- all parameters -->
+            <EnumeratedArgumentType name="param_hash_type">
+                <IntegerDataEncoding sizeInBits="32" />
+                <EnumerationList>
+                    <Enumeration value="2837432348" label="voltage_threshold" />
+                    <Enumeration value="2826980114" label="magic_number" />
+                    <Enumeration value="3378179374" label="disk_free" />
+                </EnumerationList>
+            </EnumeratedArgumentType>
+
+
+            <!-- types used for TC(20,x) -->
+            <IntegerArgumentType name="number_of_parameters_type">
+                <IntegerDataEncoding sizeInBits="16" />
+            </IntegerArgumentType>
+
+            <IntegerArgumentType name="int_value_type" sizeInBits="64" signed="true">
+                <IntegerDataEncoding sizeInBits="64" />
+            </IntegerArgumentType>
+            <IntegerArgumentType name="uint_value_type" sizeInBits="64" signed="false">
+                <IntegerDataEncoding sizeInBits="64" encoding="unsigned" />
+            </IntegerArgumentType>
+            <FloatArgumentType name="float_value_type" sizeInBits="64">
+                <FloatDataEncoding sizeInBits="64" />
+            </FloatArgumentType>
+
+            <ArrayArgumentType arrayTypeRef="param_hash_type" name="param_hash_array_type">
+                <DimensionList><Dimension>
+                    <StartingIndex><FixedValue>0</FixedValue></StartingIndex>
+                    <EndingIndex><DynamicValue>
+                        <ArgumentInstanceRef argumentRef="number_of_parameters" />
+                        <LinearAdjustment intercept="-1" />
+                    </DynamicValue></EndingIndex>
+                </Dimension></DimensionList>
+            </ArrayArgumentType>
+
+            <AggregateArgumentType name="param_hash_uint_value_pair_type">
+                <MemberList>
+                    <Member typeRef="param_hash_uint_writeable_type" name="param_hash" />
+                    <Member typeRef="uint_value_type" name="value" />
+                </MemberList>
+            </AggregateArgumentType>
+            <ArrayArgumentType arrayTypeRef="param_hash_uint_value_pair_type" name="param_hash_uint_value_pair_array_type">
+                <DimensionList><Dimension>
+                    <StartingIndex><FixedValue>0</FixedValue></StartingIndex>
+                    <EndingIndex><DynamicValue>
+                        <ArgumentInstanceRef argumentRef="number_of_parameters" />
+                        <LinearAdjustment intercept="-1" />
+                    </DynamicValue></EndingIndex>
+                </Dimension></DimensionList>
+            </ArrayArgumentType>
+        </ArgumentTypeSet>
+
+        <MetaCommandSet>
+            <MetaCommand name="TC(20,1)_report_parameter_values">
+                <BaseMetaCommand metaCommandRef="/PUS/pus-tc">
+                    <ArgumentAssignmentList>
+                        <ArgumentAssignment argumentName="type" argumentValue="20" />
+                        <ArgumentAssignment argumentName="subtype" argumentValue="1" />
+                    </ArgumentAssignmentList>
+                </BaseMetaCommand>
+                <ArgumentList>
+                    <Argument argumentTypeRef="number_of_parameters_type" name="number_of_parameters" />
+                    <Argument argumentTypeRef="param_hash_array_type" name="parameters" />
+                </ArgumentList>
+                <CommandContainer name="TC(20_1)_report_parameter_values_container">
+                    <EntryList>
+                        <ArgumentRefEntry argumentRef="number_of_parameters" />
+                        <ArgumentRefEntry argumentRef="parameters" />
+                    </EntryList>
+                    <BaseContainer containerRef="/PUS/pus-tc" />
+                </CommandContainer>
+            </MetaCommand>
+
+            <MetaCommand name="TC(20,3)_set_parameter_values_int">
+                <BaseMetaCommand metaCommandRef="/PUS/pus-tc">
+                    <ArgumentAssignmentList>
+                        <ArgumentAssignment argumentName="type" argumentValue="20" />
+                        <ArgumentAssignment argumentName="subtype" argumentValue="3" />
+                    </ArgumentAssignmentList>
+                </BaseMetaCommand>
+                <ArgumentList>
+                    <Argument argumentTypeRef="number_of_parameters_type" name="number_of_parameters" />
+                    <Argument argumentTypeRef="param_hash_uint_value_pair_array_type" name="parameters" />
+                </ArgumentList>
+                <CommandContainer name="TC(20_3)_report_parameter_values_container">
+                    <EntryList>
+                        <ArgumentRefEntry argumentRef="number_of_parameters" />
+                        <ArgumentRefEntry argumentRef="parameters" />
+                    </EntryList>
+                    <BaseContainer containerRef="/PUS/pus-tc" />
+                </CommandContainer>
+            </MetaCommand>
+        </MetaCommandSet>
+
+    </CommandMetaData>
+
+    <TelemetryMetaData>
+        <ParameterTypeSet>
+            <IntegerParameterType name="param_hash_type" signed="false">
+                <IntegerDataEncoding sizeInBits="32" encoding="unsigned" />
+            </IntegerParameterType>
+
+            <!-- parameter datatypes -->
+            <FloatParameterType name="voltage_threshold_type">
+                <FloatDataEncoding sizeInBits="32" />
+                <!-- todo add min and max -->
+            </FloatParameterType>
+            <IntegerParameterType name="magic_number_type">
+                <IntegerDataEncoding sizeInBits="16" />
+                <!-- todo add min and max -->
+            </IntegerParameterType>
+            <IntegerParameterType name="disk_free_type">
+                <IntegerDataEncoding sizeInBits="8" />
+                <!-- todo add min and max -->
+            </IntegerParameterType>
+
+            <!-- parameter types used in TM(20, 2) -->
+            <IntegerParameterType name="number_of_parameters_type">
+                <IntegerDataEncoding sizeInBits="16" />
+            </IntegerParameterType>
+
+        </ParameterTypeSet>
+
+        <ParameterSet>
+            <Parameter parameterTypeRef="param_hash_type" name="param_hash" />
+            <Parameter parameterTypeRef="voltage_threshold_type" name="voltage_threshold">
+                <AliasSet>
+                    <Alias nameSpace="onboard-parameter-hash" alias="2837432348" />
+                </AliasSet>
+            </Parameter> 
+            <Parameter parameterTypeRef="magic_number_type" name="magic_number">
+                <AliasSet>
+                    <Alias nameSpace="onboard-parameter-hash" alias="2826980114" />
+                </AliasSet>
+            </Parameter> 
+            <Parameter parameterTypeRef="disk_free_type" name="disk_free">
+                <AliasSet>
+                    <Alias nameSpace="onboard-parameter-hash" alias="3378179374" />
+                </AliasSet>
+            </Parameter> 
+
+            <!-- parameters used in TM(20, 2) -->
+            <Parameter parameterTypeRef="number_of_parameters_type" name="number_of_parameters" />
+        </ParameterSet>
+
+        <ContainerSet>
+            <SequenceContainer name="param_hash_value_pair">
+                <EntryList>
+                    <ParameterRefEntry parameterRef="param_hash" />
+                    <IndirectParameterRefEntry aliasNameSpace="onboard-parameter-hash">
+                        <ParameterInstance parameterRef="param_hash" />
+                    </IndirectParameterRefEntry>
+                </EntryList>
+            </SequenceContainer>
+
+            <SequenceContainer name="TM(20,2)_parameter_value_report">
+                <EntryList>
+                    <ParameterRefEntry parameterRef="number_of_parameters" />
+                    <ContainerRefEntry containerRef="param_hash_value_pair">
+                        <RepeatEntry>
+                            <Count><DynamicValue><ParameterInstanceRef parameterRef="number_of_parameters" /></DynamicValue></Count>
+                        </RepeatEntry>
+                    </ContainerRefEntry>
+                </EntryList>
+                <BaseContainer containerRef="/PUS/pus-tm">
+                    <RestrictionCriteria><ComparisonList>
+                        <Comparison parameterRef="/PUS/type" value="20" />
+                        <Comparison parameterRef="/PUS/subtype" value="2" />
+                    </ComparisonList></RestrictionCriteria>
+                </BaseContainer>
+            </SequenceContainer>
+        </ContainerSet>
+    </TelemetryMetaData>
+
+</SpaceSystem>

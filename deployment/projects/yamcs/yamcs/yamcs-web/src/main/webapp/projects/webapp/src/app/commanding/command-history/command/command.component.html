@@ -1,0 +1,11 @@
+@if (command$ | async; as command) {
+  <app-instance-page>
+    <app-instance-toolbar>
+      <ya-page-icon-button routerLink=".." [queryParams]="{ c: yamcs.context }" icon="arrow_back" />
+      Command history / {{ command.id }}
+    </app-instance-toolbar>
+    <div class="panel-content">
+      <app-command-detail2 [command]="command" />
+    </div>
+  </app-instance-page>
+}

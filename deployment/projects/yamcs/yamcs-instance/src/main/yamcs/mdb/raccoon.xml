@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SpaceSystem name="RACCOON">
+	<Header validationStatus="Unknown" version="1.2" date="2020-11-26T03:11:27Z">
+	</Header>
+	<TelemetryMetaData>
+		<ParameterTypeSet>
+		</ParameterTypeSet>
+		<ParameterSet>
+		</ParameterSet>
+		<ContainerSet>
+		</ContainerSet>
+	</TelemetryMetaData>
+	<CommandMetaData>
+		<ArgumentTypeSet>
+			<EnumeratedArgumentType name="voltage_num_enum" baseType="/dt/uint8">
+				<EnumerationList>
+					<Enumeration label="PRIMARY" value="1" />
+					<Enumeration label="SECONDARY" value="2" />
+					<Enumeration label="BACKUP" value="3" />
+				</EnumerationList>
+			</EnumeratedArgumentType>
+			<IntegerArgumentType name="voltage_num_uint8" baseType="/dt/uint8">
+			<!--  we allow here up to 4 to be able to send a negative start from the simulator -->
+				<ValidRange minInclusive="1" maxInclusive="4" validRangeAppliesToCalibrated="false" />
+			</IntegerArgumentType>
+		</ArgumentTypeSet>
+		<MetaCommandSet>
+			<MetaCommand name="sim-tc" abstract="true">
+				<BaseMetaCommand metaCommandRef="/PUS/pus-tc">
+					<ArgumentAssignmentList>
+						<ArgumentAssignment argumentName="apid" argumentValue="7" />
+						<ArgumentAssignment argumentName="type" argumentValue="25" />
+					</ArgumentAssignmentList>
+				</BaseMetaCommand>
+				<CommandContainer name="sim-tc">
+					<BaseContainer containerRef="/PUS/pus-tc" />
+				</CommandContainer>
+			</MetaCommand>
+			<MetaCommand name="SWITCH_VOLTAGE_ON_ENUM">
+				<BaseMetaCommand metaCommandRef="sim-tc">
+					<ArgumentAssignmentList>
+						<ArgumentAssignment argumentName="subtype" argumentValue="1" />
+					</ArgumentAssignmentList>
+				</BaseMetaCommand>
+				<ArgumentList>
+					<Argument argumentTypeRef="voltage_num_enum" name="voltage_num" shortDescription="voltage number to switch on" />
+				</ArgumentList>
+				<CommandContainer name="SWITCH_VOLTAGE_ON_ENUM">
+					<EntryList>
+						<ArgumentRefEntry argumentRef="voltage_num" />
+					</EntryList>
+					<BaseContainer containerRef="sim-tc" />
+				</CommandContainer>
+			</MetaCommand>
+		</MetaCommandSet>
+	</CommandMetaData>
+	-->
+</SpaceSystem>

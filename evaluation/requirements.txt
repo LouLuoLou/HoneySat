@@ -1,0 +1,4 @@
+pymongo==4.15.3
+skyfield==1.53
+requests==2.32.5
+yamcs-client==1.12.0

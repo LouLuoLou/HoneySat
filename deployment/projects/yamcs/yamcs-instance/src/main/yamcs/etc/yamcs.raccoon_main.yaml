@@ -1,0 +1,160 @@
+services:
+  - class: org.yamcs.archive.XtceTmRecorder
+  - class: org.yamcs.archive.ParameterRecorder
+  - class: org.yamcs.archive.AlarmRecorder
+  - class: org.yamcs.archive.EventRecorder
+  - class: org.yamcs.archive.ReplayServer
+  - class: org.yamcs.parameter.SystemParametersService
+    args:
+      producers: ['jvm', 'fs']
+  - class: org.yamcs.time.TimeCorrelationService
+    name: tco0
+    args:
+       onboardDelay: 1.0
+       accuracy: 0.5
+       validity: 1.0
+       defaultTof: 0.001
+  - class: org.yamcs.ProcessorCreatorService
+    args: 
+      name: "realtime"
+      type: "realtime" 
+  - class: org.yamcs.archive.CommandHistoryRecorder
+  - class: org.yamcs.parameterarchive.ParameterArchive
+    args:
+      realtimeFiller: 
+        enabled: false
+      backFiller:
+        enabled: true
+        warmupTime: 60
+
+  - class: org.yamcs.cfdp.CfdpService
+    name: cfdp0
+    args:
+     inactivityTimeout: 30000
+     sequenceNrLength: 4
+     maxPduSize: 512
+     incomingBucket: "cfdpDown"
+     allowRemoteProvidedBucket: false
+     allowRemoteProvidedSubdirectory: false
+     allowDownloadOverwrites: false
+     maxExistingFileRenames: 1000
+     eofAckTimeout: 3000
+     eofAckLimit: 5
+     #Note that the simulator does not process commands faster than 1/second.
+     # Decreasign this number will make the packets queue up in the TCP queue
+     # and the CFDP sender will timeout waiting for the EOF ACK
+     sleepBetweenPdus: 1000
+     #The simulator only supports one transfer at a time
+     maxNumPendingUploads: 1
+     #How many milliseconds to keep the incoming transfer in the pending queue after completion
+     #During this time an incoming PDU with that transaction id will not be recognized as a new transaction
+     pendingAfterCompletion: 10000
+     localEntities:
+       - name: id11
+         id: 11
+         bucket: bucket1
+       - name: id2
+         id: 12
+         bucket: bucket2
+     remoteEntities:
+       - name: id5
+         id: 5
+       - name: target2
+         id: 7
+     senderFaultHandlers:
+       AckLimitReached: suspend
+     fileListingParserClassName: org.yamcs.filetransfer.CsvListingParser
+     fileListingParserArgs:
+       timestampMultiplier: 1
+  - class: org.yamcs.replication.ReplicationMaster
+    args:
+      tcpRole: client
+      # enableTls: false
+      # pageSize: 500
+      # maxPages: 500
+      streams: ["tm_realtime", "tc_realtime"]
+      # maxFileSizeKB: 102400
+      # expirationDays: 7
+      # fileCloseTimeSec: 300
+      slaves:
+      #- host: "yamcs_client"
+      - host: "salsat-buildserver.ilr.tu-berlin.de"
+        port: 8059
+        instance: "raccoon_client"
+        enableTls: false
+      #reconnectionInterval: 5000
+
+dataLinks:
+  - name: tm_realtime
+    class: org.yamcs.tctm.UdpTmDataLink
+    stream: tm_realtime
+    #host: 127.0.0.1
+    port: 10015
+    # Give the embedded simulator some time to boot up
+    #packetPreprocessorClassName: org.yamcs.tctm.pus.PusPacketPreprocessor
+    #packetPreprocessorArgs:
+    #    errorDetection:
+    #       type: CRC-16-CCIIT
+    #    timeEncoding:
+    #       type: CUC
+    #       epoch: NONE           
+    #    tcoService: tco0
+    packetPreprocessorClassName: org.yamcs.tctm.GenericPacketPreprocessor
+    packetPreprocessorArgs:
+      timestampOffset: -1 
+      seqCountOffset: 4
+    
+  - name: tc_realtime
+    class: org.yamcs.tctm.UdpTcDataLink
+    stream: tc_realtime
+    host: localhost 
+    port: 10025
+    # Give the embedded simulator smoe time to boot up
+    commandPostprocessorClassName: org.yamcs.tctm.pus.PusCommandPostprocessor
+    commandPostprocessorArgs:
+        errorDetection:
+          type: CRC-16-CCIIT
+        
+mdb:
+  # Configuration of the active loaders
+  # Valid loaders are: sheet, xtce or fully qualified name of the class
+  - type: "xtce"
+    spec: "mdb/dt.xml"
+
+  - type: "xtce"
+    spec: "mdb/xtce-pus-frame-attempt2.xml"
+ 
+  - type: "xtce"
+    spec: "mdb/raccoon.xml"
+    
+  - type: "xtce"
+    spec: "mdb/raccoon-generated.xml"
+
+  - type: "xtce"
+    spec: "mdb/raccoon-honeysat.xml"
+
+  - type: "xtce"
+    spec: "mdb/pus11.xml"
+
+  - type: "xtce"
+    spec: "mdb/parameters-dt-v2.xml"
+
+  #- type: "xtce"
+  #  spec: "mdb/raccoon-parameters.xml"
+
+#Configuration for streams created at server startup
+streamConfig:
+  tm:
+    - name: "tm_realtime"
+      processor: "realtime"
+  invalidTm: "invalid_tm_stream"
+  cmdHist: ["cmdhist_realtime", "cmdhist_dump"]
+  event: ["events_realtime", "events_dump"]
+  param: ["pp_realtime", "sys_param", "proc_param"]
+  parameterAlarm: ["alarms_realtime"]
+  eventAlarm: ["event_alarms_realtime"]
+  tc: 
+    - name: "tc_realtime"
+      processor: "realtime"
+  sqlFile: "etc/cfdp_streams.sql"
+

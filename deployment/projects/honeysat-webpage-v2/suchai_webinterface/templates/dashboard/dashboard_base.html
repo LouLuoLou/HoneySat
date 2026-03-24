@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    {# ----------------   SIDE BAR  ---------------- #}
+    <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 280px;">
+        <ul class="nav nav-pills flex-column mb-auto">
+            <li class="nav-item">
+                <a href="{% url "web_interface" %}" id="id_nav_link_web_interface" class="nav-link text-white">
+                    Web Interface
+                </a>
+            </li>
+            <li>
+                <a href="{% url "remote_desktop" %}" id="id_nav_link_remote_desktop" class="nav-link text-white">
+                    Remote Desktop (VNC)
+                </a>
+            </li>
+            <li>
+                <a href="{% url "docs_plain" %}" id="id_nav_link_docs_plain" class="nav-link text-white">
+                    Docs (Basic plain text)
+                </a>
+            </li>
+            <li>
+                <a href="{% url "docs_hugo" %}" id="id_nav_link_docs_hugo" class="nav-link text-white">
+                    Docs (New)
+                </a>
+            </li>
+
+        </ul>
+        <hr>
+        <div class="dropdown" style="padding-bottom: 50px">
+            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+               id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                {% if user.is_authenticated %}
+                    <strong>{{ user.username }}</strong>
+                {% else %}
+                    <strong>ERROR!</strong>
+                {% endif %}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1" style="">
+                {#                <li><a class="dropdown-item" href="#">New project...</a></li>#}
+                {#                <li><a class="dropdown-item" href="#">Settings</a></li>#}
+                {#                <li><a class="dropdown-item" href="#">Profile</a></li>#}
+                {#                <li><hr class="dropdown-divider"></li>#}
+                <li><a class="dropdown-item" href="{% url "logout" %}">Logout</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+    {# ----------------   MAIN CONTENT  ---------------- #}
+    <div class="container-fluid">
+        {% block dashboard_content %}
+            <h1 class="mt-5">Dashboard</h1>
+            <p class="lead">Welcome to the dashboard</p>
+        {% endblock %}
+    </div>
+
+    <script>
+        // Highlight the active link in the sidebar
+        document.addEventListener("DOMContentLoaded", function () {
+            let element = document.getElementById("{% block id_for_selected_page %}{% endblock %}");
+            if (element) {
+                element.classList.remove("text-white");
+                element.classList.add("active");
+                element.setAttribute("aria-current", "page");
+            }
+        });
+
+    </script>
+{% endblock %}
+

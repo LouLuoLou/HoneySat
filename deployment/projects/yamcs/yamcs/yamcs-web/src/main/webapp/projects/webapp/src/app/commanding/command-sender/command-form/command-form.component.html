@@ -1,0 +1,106 @@
+<form [formGroup]="form" class="ya-form" [class.showAll]="showAll$ | async">
+  <ng-container formGroupName="args">
+    @for (argument of arguments; track argument; let first = $first) {
+      @if (!first) {
+        <br />
+      }
+      <app-argument
+        [name]="argument.name"
+        [description]="argument.description"
+        [type]="argument.type"
+        [initialValue]="argument.initialValue"
+        [templateProvider]="templateProvider" />
+    }
+
+    @for (argument of argumentsWithInitial; track argument; let first = $first) {
+      @if (!first || arguments.length) {
+        <br class="hasInitial" />
+      }
+      <app-argument
+        [name]="argument.name"
+        [description]="argument.description"
+        [type]="argument.type"
+        [initialValue]="argument.initialValue"
+        [templateProvider]="templateProvider"
+        class="hasInitial" />
+    }
+
+    @if (config.collapseInitializedArguments) {
+      @if (argumentsWithInitial.length && !(showAll$ | async)) {
+        @if (arguments.length) {
+          <br />
+        }
+        <ya-text-action (click)="showAll$.next(true)" icon="double_arrow">
+          Show {{ argumentsWithInitial.length }}
+          @if (argumentsWithInitial.length === 1) {
+            argument
+          } @else {
+            arguments
+          }
+          with defaults
+        </ya-text-action>
+      }
+    }
+  </ng-container>
+
+  @if (enableComment || (showCommandOptions() && commandOptions.length)) {
+    <p>&nbsp;</p>
+    <h3>Options</h3>
+  }
+
+  @if (showCommandOptions()) {
+    @for (extra of commandOptions; track extra) {
+      @switch (extra.type) {
+        @case ("BOOLEAN") {
+          <div class="label">
+            {{ extra.verboseName || extra.id }}
+            @if (extra.help) {
+              <ya-help [dialogTitle]="extra.verboseName || extra.id">
+                <div [innerHTML]="extra.help"></div>
+              </ya-help>
+            }
+            <br />
+            <input type="radio" [formControlName]="'extra__' + extra.id" value="true" />
+            true
+            <input type="radio" [formControlName]="'extra__' + extra.id" value="false" />
+            false
+          </div>
+        }
+        @case ("TIMESTAMP") {
+          <div class="label">
+            {{ extra.verboseName || extra.id }}
+            @if (extra.help) {
+              <ya-help [dialogTitle]="extra.verboseName || extra.id">
+                <div [innerHTML]="extra.help"></div>
+              </ya-help>
+            }
+            <ya-date-time-input
+              [formControlName]="'extra__' + extra.id"
+              [showMillis]="true"
+              [showClear]="true"
+              [showNow]="true" />
+          </div>
+        }
+        @default {
+          <div class="label">
+            {{ extra.verboseName || extra.id }}
+            @if (extra.help) {
+              <ya-help [dialogTitle]="extra.verboseName || extra.id">
+                <div [innerHTML]="extra.help"></div>
+              </ya-help>
+            }
+            <input type="text" [formControlName]="'extra__' + extra.id" />
+          </div>
+        }
+      }
+      <br />
+    }
+  }
+  @if (enableComment) {
+    <label>
+      Comment
+      <span class="hint">(optional)</span>
+      <textarea formControlName="comment" rows="3" style="width: 100%; resize: none"></textarea>
+    </label>
+  }
+</form>

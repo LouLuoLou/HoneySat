@@ -1,0 +1,63 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'vacuum_test_node'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=vacuum_test_node",
+                    "--package=vacuum_test_node"
+                ],
+                "filter": {
+                    "name": "vacuum_test_node",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/src/vacuum_test_node"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'rccn_usr_comm'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=rccn_usr_comm",
+                    "--package=rccn_usr_comm"
+                ],
+                "filter": {
+                    "name": "rccn_usr_comm",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/src/rccn_usr_comm"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'rccn_usr_comm'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=rccn_usr_comm",
+                    "--package=rccn_usr_comm"
+                ],
+                "filter": {
+                    "name": "rccn_usr_comm",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

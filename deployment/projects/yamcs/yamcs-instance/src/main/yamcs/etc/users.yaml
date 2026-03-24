@@ -1,0 +1,8 @@
+root:
+  password: sCvuyXIvEtC3Meu0
+  superuser: true
+
+administrator:
+  password: Admin123
+  roles:
+    - Operator

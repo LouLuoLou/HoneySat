@@ -1,0 +1,51 @@
+@if (packet$ | async; as packet) {
+  <app-instance-page>
+    <app-instance-toolbar>
+      <ya-page-icon-button
+        routerLink="/telemetry/packets"
+        [queryParams]="{ c: yamcs.context }"
+        icon="arrow_back" />
+      {{ packet.id.name }} / {{ packet.generationTime }} / {{ packet.sequenceNumber }}
+      &nbsp;&nbsp;&nbsp;
+      <ya-page-button (click)="expandAll()" icon="unfold_more">Expand all</ya-page-button>
+      <ya-page-button (click)="collapseAll()" icon="unfold_less">Collapse all</ya-page-button>
+    </app-instance-toolbar>
+    <ya-detail-pane>
+      <ya-detail-toolbar>
+        Hex view
+        <span style="flex: 1 1 auto"></span>
+        <ya-more>
+          <button mat-menu-item (click)="copyHex(packet.packet)">Copy Hex</button>
+          <button mat-menu-item (click)="copyBinary(packet.packet)">Copy Binary</button>
+        </ya-more>
+      </ya-detail-toolbar>
+      <div style="padding: 0 16px">
+        <app-hex #hex [base64String]="packet.packet" />
+      </div>
+    </ya-detail-pane>
+    <div class="table-wrapper">
+      <div class="panel-content">
+        @if ((messages$ | async)?.length) {
+          <h4>Warnings</h4>
+          <table yaDataTable class="expand">
+            @for (message of messages$ | async; track message) {
+              <tr>
+                <td class="iconcol"><mat-icon class="icon12">warning</mat-icon></td>
+                <td class="expand">{{ message }}</td>
+              </tr>
+            }
+          </table>
+          <div class="section-divider">
+            <mat-divider />
+          </div>
+        }
+        <app-packet-detail-table
+          [packet]="packet"
+          (highlightBitRangeEvent)="onHighlightBitRange($event)"
+          (clearHighlightedBitRangeEvent)="onClearHighlightedBitRange()"
+          (selectBitRangeEvent)="onSelectBitRange($event)">
+        </app-packet-detail-table>
+      </div>
+    </div>
+  </app-instance-page>
+}

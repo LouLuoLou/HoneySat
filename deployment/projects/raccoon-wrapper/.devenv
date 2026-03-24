@@ -1,0 +1,3 @@
+RCCN_USR_DEV_CONTAINER_IMAGE="docker.io/rccn/usr-dev:latest"
+RCCN_USR_DEV_PLATFORM="linux/amd64"
+# RCCN_USR_DEV_CONTAINER_FILE="/path/to/custom/Dockerfile"

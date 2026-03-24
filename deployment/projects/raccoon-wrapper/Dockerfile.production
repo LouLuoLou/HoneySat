@@ -1,0 +1,34 @@
+# Use an official ROS2 base image
+FROM ros:foxy AS builder
+
+# Set the working directory
+WORKDIR /home/rosdev/ros2_ws
+
+# Install dependencies and build the binaries
+RUN apt-get update && \
+apt-get install -y curl && \
+curl https://sh.rustup.rs -sSf | sh -s -- -y
+
+# Copy the source code into the container
+COPY ./src ./src
+COPY ./Cargo.lock ./Cargo.toml  ./
+
+RUN . $HOME/.cargo/env && \
+    cargo build --release --package rccn_usr_comm
+
+RUN . $HOME/.cargo/env && cargo build --release --package rccn_usr_honeysat_app
+
+# Create a new stage for the final image
+FROM ubuntu:20.04
+
+# Set the working directory
+WORKDIR /opt/rccn_usr
+
+# Copy the binaries from the builder stage
+COPY --from=builder /home/rosdev/ros2_ws/target/release/rccn_usr_honeysat_app /opt/rccn_usr/rccn_usr_honeysat_app
+COPY --from=builder /home/rosdev/ros2_ws/target/release/rccn_usr_comm /opt/rccn_usr/rccn_usr_comm
+COPY ./docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+# Set the entrypoint to the binaries
+ENTRYPOINT ["/docker-entrypoint.sh"]

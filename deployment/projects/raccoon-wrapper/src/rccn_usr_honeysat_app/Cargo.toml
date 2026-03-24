@@ -1,0 +1,18 @@
+[package]
+name = "rccn_usr_honeysat_app"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.91"
+binary_serde = "1.0.24"
+crossbeam-channel = "0.5.13"
+futures = "0.3.31"
+rccn_usr = { version = "0.1.0", path = "../rccn_usr" }
+hs_zmq_interface = { version = "0.1.0", path = "../hs_zmq_interface" }
+satrs = "0.2.1"
+spacepackets = "0.12.0"
+tokio = "1.41.1"
+xtce-rs = { git = "https://github.com/jdiez17/xtce-rs", branch = "bitbuffer_write_bits", version = "0.1.0" }
+zmq = "0.10.0"
+byteorder = "1.5.0"

@@ -1,0 +1,138 @@
+# version: '3.8'
+
+services:
+  suchai-gs:
+    build: 
+      context: ./projects/honeysat-suchai-gs/
+      dockerfile: Dockerfile
+      args:
+        CONSOLE_PROMPT: "TESTNAME"
+        BANNER_CONSOLE_NAME: "TESTNAME"
+    restart: always
+    profiles: ["SUCHAI_GS", "HONEYSAT", "ALL"]
+    environment:
+      MONGO_DB_NAME: "honeysat_log"
+      MONGO_USER_NAME: "honeysat_user"
+      MONGO_PASSWORD: "h0n4yS4tt"
+      MONGO_IP: "logs_mongodb"
+      MONGO_PORT: "27017"
+    ports:
+      - 24:1234
+    depends_on:
+      - logs_mongodb
+      - honeysat-api
+    networks:
+      - internal_logs_mongo_network
+      - suchai_gs_network
+      - internal_honeysat_api_network
+
+  suchai-fsw:
+    build: 
+      context: ./projects/honeysat-suchai-fsw/
+      dockerfile: Dockerfile
+      args:
+        OBC_IDENT_NAME: "Testname"
+        CONSOLE_PROMPT: "TESTNAME"
+        BANNER_CONSOLE_NAME: "TESTNAME"
+    restart: always
+    profiles: ["SUCHAI_FSW", "HONEYSAT", "ALL"]
+    environment:
+      MONGO_DB_NAME: "honeysat_log"
+      MONGO_USER_NAME: "honeysat_user"
+      MONGO_PASSWORD: "h0n4yS4tt"
+      MONGO_IP: "logs_mongodb"
+      MONGO_PORT: "27017"
+    depends_on:
+      - logs_mongodb
+      - honeysat-api
+    networks:
+      - internal_logs_mongo_network
+      - internal_honeysat_api_network
+
+  logs_mongodb:
+    image: mongo:latest
+    restart: always
+    profiles: ["LOGS_MONGODB", "HONEYSAT", "ALL"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: honeysat_root_1
+      MONGO_INITDB_ROOT_PASSWORD: honeysat_rootpass_1234
+      MONGO_INITDB_DATABASE: honeysat_log
+    ports:
+      - "27017:27017"
+    volumes:
+      - logs_mongodb_volume:/data/db
+      - ./configs/logs_mongo_conf/2_custom_role_creation_init.js:/docker-entrypoint-initdb.d/2_custom_role_creation_init.js:ro
+      - ./configs/logs_mongo_conf/3_user_creation_init.js:/docker-entrypoint-initdb.d/3_user_creation_init.js:ro
+    networks:
+      - internal_logs_mongo_network
+      - private_logs_mongo_network
+
+  honeysat-api:
+    build: ./projects/honeysat-api/
+    restart: always
+    profiles: ["HONEYSAT_API", "HONEYSAT", "ALL"]
+    # entrypoint: ["tail", "-f", "/dev/null"]
+    ports:
+      - "8001:8001"
+      - "8002:8002"
+    environment:
+      MONGO_DB_NAME: "honeysat_log"
+      MONGO_USER_NAME: "honeysat_user"
+      MONGO_PASSWORD: "h0n4yS4tt"
+      MONGO_IP: "logs_mongodb"
+      MONGO_PORT: "27017"
+      GROUND_STATION_LAT: "34.0522"
+      GROUND_STATION_LON: "-118.2437"
+      SATELLITE_NAME_TLE: "TEST-32257"
+      SATELLITE_NORAD_CATALOG_NUMBER: "62171"
+    depends_on:
+      - logs_mongodb
+    networks:
+      - internal_logs_mongo_network
+      - internal_honeysat_api_network
+      - private_honeysat_network
+
+  honeysat-webpage-v2:
+    build: ./projects/honeysat-webpage-v2/
+    # image: honeysat-webpage-v2
+    restart: always
+    profiles: ["WEB", "ALL"]
+    env_file: 
+      - ./configs/csp_webpage.env
+    environment:
+      DJANGO_DEBUG: "False"
+      # SECRET_KEY: "ZuMP&ub$WRuUySJ2dSa&rpDzLA!8rVPg9S!VREmyJ**d&VYige6pByWiQeaYNtoXJBHMwBapmjE6AE5h^vAQp4R2Be7^h#KC9td&%ty@6!QoQ%VH9u7@&@u3fTCTR4px"
+      SECRET_KEY: "django-insecure-yg^om13za-@h6=ylvtlvb7u-iik5ecruxj%de=h)a1_@7stkuv"
+      TELNET_HOST: "suchai-gs"
+      TELNET_PORT: "1234"
+      MONGO_DB_NAME: "honeysat_log"
+      MONGO_USER_NAME: "honeysat_user"
+      MONGO_PASSWORD: "h0n4yS4tt"
+      MONGO_IP: "logs_mongodb"
+      MONGO_PORT: "27017"
+    depends_on:
+      - suchai-gs
+      - logs_mongodb
+      - suchai-fsw
+    ports:
+      - "80:8000"
+    networks:
+      - suchai_gs_network
+      - internal_logs_mongo_network
+
+volumes:
+  logs_mongodb_volume: {}
+
+networks:
+  internal_logs_mongo_network:
+    driver: bridge
+    internal: true
+  internal_honeysat_api_network:
+    driver: bridge
+    internal: true
+  suchai_gs_network:
+    driver: bridge
+  private_honeysat_network:
+    driver: bridge
+  private_logs_mongo_network:
+    driver: bridge

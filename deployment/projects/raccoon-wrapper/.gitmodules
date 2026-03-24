@@ -1,0 +1,6 @@
+[submodule "src/rcostool"]
+	path = src/rcostool
+	url = https://gitlab.com/raccoon-os/rcostool
+[submodule "src/thermal-test-ws"]
+	path = src/thermal-test-ws
+	url = https://gitlab.com/raccoon-os/thermal-test-ws/

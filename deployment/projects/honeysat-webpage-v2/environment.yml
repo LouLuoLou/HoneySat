@@ -1,0 +1,12 @@
+name: honeysat_django
+channels:
+  - defaults
+dependencies:
+  - python=3.12
+  - pip
+  - pip:
+    - Django==4.2.13
+    - telnetlib3==2.0.4
+    - asgiref==3.8.1
+    - sqlparse==0.5.0
+    - pymongo==4.8.0

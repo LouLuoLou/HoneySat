@@ -1,0 +1,59 @@
+<ya-message-bar #messageBar />
+
+<mat-toolbar class="top">
+  <mat-toolbar-row>
+    <ya-page-icon-button routerLink=".." icon="arrow_back" />
+    Create an instance
+  </mat-toolbar-row>
+</mat-toolbar>
+
+<app-create-instance-wizard-step step="2" />
+
+@if (template$ | async; as template) {
+  <div class="form-content ya-form">
+    <form [formGroup]="form" novalidate>
+      <div class="label">
+        Instance name
+        <br />
+        <input formControlName="name" type="text" />
+      </div>
+      @for (v of template?.variables; track v) {
+        <br />
+        @if (v.choices) {
+          <label>
+            {{ v.label || v.name }}
+            @if (v.help) {
+              <ya-help [dialogTitle]="v.label || v.name">
+                <div [innerHTML]="v.help"></div>
+              </ya-help>
+            }
+            <select [formControlName]="v.name">
+              @for (choice of v.choices; track choice) {
+                <option [value]="choice">{{ choice }}</option>
+              }
+            </select>
+          </label>
+        }
+        @if (!v.choices) {
+          <label>
+            {{ v.label || v.name }}
+            @if (v.help) {
+              <ya-help [dialogTitle]="v.label || v.name">
+                <div [innerHTML]="v.help"></div>
+              </ya-help>
+            }
+            <br />
+            <input [formControlName]="v.name" type="text" />
+          </label>
+        }
+      }
+    </form>
+    <p>&nbsp;</p>
+    <div class="action-bar">
+      <ya-button routerLink="/">CANCEL</ya-button>
+      <ya-button appearance="primary" (click)="onConfirm()" [disabled]="!form.valid">
+        CREATE
+      </ya-button>
+    </div>
+  </div>
+}

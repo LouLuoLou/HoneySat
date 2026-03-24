@@ -1,0 +1,121 @@
+<dl class="dl-horizontal no-lead">
+  <dt>Container</dt>
+  <dd>{{ container.qualifiedName | shortName }}</dd>
+
+  <dt>System</dt>
+  <dd>
+    @if (container.qualifiedName | spaceSystemName; as spaceSystemName) {
+      <a
+        routerLink="/mdb/containers"
+        [queryParams]="{ c: yamcs.context, filter: spaceSystemName }"
+        class="ya-link">
+        {{ spaceSystemName }}
+      </a>
+    }
+  </dd>
+
+  @for (alias of container.alias; track alias) {
+    <dt>{{ alias.namespace }}</dt>
+    <dd>{{ alias.name }}</dd>
+  }
+
+  <dt>Short description</dt>
+  <dd>{{ container.shortDescription || "-" }}</dd>
+
+  <dt>Long description</dt>
+  <dd>
+    @if (container.longDescription) {
+      <app-markdown [text]="container.longDescription" />
+    } @else {
+      -
+    }
+  </dd>
+</dl>
+
+<mat-divider />
+
+<dl class="dl-horizontal">
+  <dt>Max interval</dt>
+  <dd>
+    @if (container.maxInterval) {
+      <span>{{ container.maxInterval | millisDuration }}</span>
+    } @else {
+      <span>-</span>
+    }
+  </dd>
+
+  <dt>Base container</dt>
+  <dd>
+    @if (container.baseContainer) {
+      <a
+        [routerLink]="['/mdb/containers/', container.baseContainer.qualifiedName]"
+        [queryParams]="{ c: yamcs.context }"
+        class="ya-link">
+        {{ container.baseContainer.qualifiedName || "-" }}
+      </a>
+    } @else {
+      <span>-</span>
+    }
+  </dd>
+
+  <dt>Restriction criteria</dt>
+  <dd class="mono">
+    {{ container.restrictionCriteriaExpression || "-" }}
+  </dd>
+
+  <dt>Archive partition</dt>
+  <dd>
+    {{ container.archivePartition ? "Yes" : "No" }}
+  </dd>
+</dl>
+
+<mat-divider />
+
+<dl class="dl-horizontal">
+  <dt>Sequence entries</dt>
+  <dd>
+    @if (container.entry) {
+      <table yaDataTable>
+        <tr>
+          <th>Type</th>
+          <th>Ref</th>
+          <th>Size in bits</th>
+          <th>Location in bits</th>
+          <th>Reference location</th>
+        </tr>
+        @for (entry of container.entry; track entry) {
+          <tr>
+            @if (entry.parameter) {
+              <td>Parameter</td>
+              <td>
+                <a
+                  [routerLink]="['/mdb/parameters/', entry.parameter.qualifiedName]"
+                  [queryParams]="{ c: yamcs.context }"
+                  class="ya-link">
+                  {{ entry.parameter.qualifiedName }}
+                </a>
+              </td>
+              <td>{{ entry.parameter.type?.dataEncoding?.sizeInBits ?? "-" }}</td>
+            }
+            @if (entry.container) {
+              <td>Container</td>
+              <td>
+                <a
+                  [routerLink]="['/mdb/containers/', entry.container.qualifiedName]"
+                  [queryParams]="{ c: yamcs.context }"
+                  class="ya-link">
+                  {{ entry.container.qualifiedName }}
+                </a>
+              </td>
+              <td>{{ entry.container.sizeInBits ?? "-" }}</td>
+            }
+            <td>{{ entry.locationInBits }}</td>
+            <td>{{ entry.referenceLocation }}</td>
+          </tr>
+        }
+      </table>
+    } @else {
+      <span>-</span>
+    }
+  </dd>
+</dl>

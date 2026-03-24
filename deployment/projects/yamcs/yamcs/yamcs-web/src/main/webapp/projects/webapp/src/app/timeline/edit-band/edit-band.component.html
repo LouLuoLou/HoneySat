@@ -1,0 +1,31 @@
+@if (band$ | async; as band) {
+  <app-instance-page>
+    <app-instance-toolbar>Edit band</app-instance-toolbar>
+    <div class="form-content ya-form">
+      <form [formGroup]="form" novalidate autocomplete="off">
+        @if (band.type === "ITEM_BAND") {
+          <app-edit-item-band [form]="form" [band]="band" />
+        }
+        @if (band.type === "SPACER") {
+          <app-edit-spacer [form]="form" [band]="band" />
+        }
+        @if (band.type === "TIME_RULER") {
+          <app-edit-time-ruler [form]="form" [band]="band" />
+        }
+        @if (band.type === "COMMAND_BAND") {
+          <app-edit-command-band [form]="form" [band]="band" />
+        }
+      </form>
+      <p>&nbsp;</p>
+      <div class="action-bar">
+        <ya-button (click)="location.back()">Cancel</ya-button>
+        <ya-button
+          appearance="primary"
+          (click)="doOnConfirm()"
+          [disabled]="!(dirty$ | async) || !form.valid">
+          SAVE CHANGES
+        </ya-button>
+      </div>
+    </div>
+  </app-instance-page>
+}

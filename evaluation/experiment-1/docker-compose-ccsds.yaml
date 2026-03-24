@@ -1,0 +1,112 @@
+services:
+  logs_mongodb:
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: honeysat_root_1
+      MONGO_INITDB_ROOT_PASSWORD: honeysat_rootpass_1234
+      MONGO_INITDB_DATABASE: honeysat_log
+    ports:
+      - "27017:27017"
+    volumes:
+      - logs_mongodb_volume:/data/db
+      - ../../deployment/configs/logs_mongo_conf/2_custom_role_creation_init.js:/docker-entrypoint-initdb.d/2_custom_role_creation_init.js:ro
+      - ../../deployment/configs/logs_mongo_conf/3_user_creation_init.js:/docker-entrypoint-initdb.d/3_user_creation_init.js:ro
+    networks:
+      - internal_logs_mongo_network
+      - private_logs_mongo_network
+
+  honeysat_api:
+    build:
+      context: ../../deployment/projects/honeysat-api
+      dockerfile: Dockerfile
+    restart: always
+    # ports:
+    #   - "8001:8001"
+    #   - "8002:8002"
+    env_file:
+      - ./honeysat-api.env
+    environment:
+      MONGO_DB_NAME: "honeysat_log"
+      MONGO_USER_NAME: "honeysat_user"
+      MONGO_PASSWORD: "h0n4yS4tt"
+      MONGO_IP: "logs_mongodb"
+      MONGO_PORT: "27017"
+      SATELLITE_NAME_TLE: "STARLINK-32257"
+      SATELLITE_NORAD_CATALOG_NUMBER: "62171"
+    depends_on:
+      - logs_mongodb
+    networks:
+      - internal_logs_mongo_network
+      - internal_honeysat_api_network
+      - private_honeysat_network
+
+  sat_proxy:
+    build:
+      context: ../../deployment/projects/raccoon-wrapper
+      dockerfile: Dockerfile.production
+    environment:
+      HS_IP: honeysat_api
+      HS_PORT: "5555"
+      # Comment this line to make satellite itself handle reachability
+      ALWAYS_REACHABLE: "1"
+    volumes:
+      - ../../deployment/configs/rccn-comm-etc/:/opt/rccn_usr/etc/
+    depends_on:
+      - honeysat_api
+    networks:
+      - internal_honeysat_api_network
+      - yamcs_network
+
+  yamcs:
+    build:
+      context: ../../deployment/projects/yamcs
+      dockerfile: Dockerfile
+    environment:
+      LISTEN_PORT: "8090"
+      LISTEN_ADDRESS: "0.0.0.0"
+      DATA_DIR: /data/
+      SERVER_ID: localhost
+      SECRET_KEY: HAVIJbokhorBRO
+      PROXY_HOST: sat_proxy
+    ports:
+      - "0.0.0.0:8090:8090"
+    volumes:
+      - yamcs_data:/data/
+    networks:
+      - yamcs_network
+    depends_on:
+      - sat_proxy
+
+  novnc:
+    build: 
+      context: ../../deployment/projects/vnc-setup
+      dockerfile: Dockerfile
+    environment:
+      ROOT_PASSWORD: kEmju7vu
+      SCR_WIDTH: 1920
+      SCR_HEIGHT: 1200
+      VNC_RESIZE: scale
+      HOME: /root
+    ports:
+      - "8080:8080"
+      - "5900:5900"
+
+volumes:
+  logs_mongodb_volume: {}
+  yamcs_data: {}
+
+
+networks:
+  internal_logs_mongo_network:
+    driver: bridge
+    internal: true
+  internal_honeysat_api_network:
+    driver: bridge
+    internal: true
+  private_honeysat_network:
+    driver: bridge
+  private_logs_mongo_network:
+    driver: bridge
+  yamcs_network:
+    driver: bridge

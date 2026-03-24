@@ -1,0 +1,101 @@
+HoneySat Artifact Licensing Notice 
+==================================
+
+This archive mixes HoneySat-authored material with third-party
+software.
+
+HoneySat-authored content in this archive (including deployment and
+evaluation documentation, Docker compose files, honeysat-webpage-v2
+assets, telnet-honeypot code, and other infrastructure not listed
+under "Third-party components" below) is provided under the MIT
+License, unless a different license header is present in a specific
+file. The full text of the MIT License is included at the end of
+this document. The MIT terms do not override the licenses of bundled
+third-party components.
+
+Third-party components and licenses 
+-----------------------------------
+
+The following components are used by HoneySat. Some are included in
+this archive for the convenience of artifact evaluation. Others are
+downloaded from their original repositories during deployment. These
+components retain their own licenses as set by their authors.
+
+- YAMCS
+
+  - Location in this archive: `deployment/projects/yamcs/` - License:
+    GNU Affero General Public License v3.0 (AGPL-3.0) - License file
+    in this archive: `deployment/projects/yamcs/yamcs/AGPL-LICENSE.txt`
+  - Upstream repository: https://github.com/yamcs/yamcs
+
+- RACCOON OS userspace and wrapper
+
+  - Location in this archive: `deployment/projects/raccoon-wrapper/`
+  - License: GNU General Public License v3.0 (GPL-3.0) - License file
+    in this archive: `deployment/projects/raccoon-wrapper/LICENSE` -
+    Upstream repository and license:
+    https://gitlab.com/rccn/raccoon-os/-/blob/master/LICENSE
+
+- SUCHAI flight software and ground station
+
+  - Locations in this archive:
+    `deployment/projects/honeysat-suchai-fsw/`,
+    `deployment/projects/honeysat-suchai-gs/`, and related Docker
+    configurations
+  - License: GNU General Public License v3.0 (GPL-3.0) - Source is
+    fetched during Docker builds from:
+    https://gitlab.com/spel-uchile/suchai-2-software
+  - Any images built from these Dockerfiles include GPL-licensed code
+    and must be redistributed under GPLv3 with corresponding source.
+    For the upstream license text see:
+    https://gitlab.com/spel-uchile/suchai-flight-software/-/blob/feature/framework/LICENSE
+
+- HoneySat API
+
+  - Location in this archive: `deployment/projects/honeysat-api/`
+  - License: MIT License - License file in this archive:
+    `deployment/projects/honeysat-api/LICENSE`
+
+Use notes 
+---------
+
+- This archive redistributes YAMCS (AGPL-3.0) and RACCOON (GPL-3.0)
+  source.
+  Use, modification, and redistribution of these components must comply
+  with their respective licenses, including any copyleft requirements.
+- SUCHAI components are incorporated via Docker images built from
+  GPL-licensed source, and redistribution of those images must also
+  comply with GPLv3.  
+- Components are typically run in separate
+  containers and are provided as an aggregation of independently
+  licensed works.
+- This summary is for convenience only and does not
+  replace the actual license texts.
+
+MIT License 
+-----------
+
+The following MIT License applies to HoneySat-authored code in this
+archive that does not already carry another license notice.
+
+Copyright (c) 2024 HoneySat authors
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject
+to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+

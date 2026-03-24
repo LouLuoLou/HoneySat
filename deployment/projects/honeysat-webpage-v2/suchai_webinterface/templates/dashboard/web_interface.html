@@ -1,0 +1,71 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load static %}
+
+{% block id_for_selected_page %}id_nav_link_web_interface{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/web_interface.css' %}">
+{% endblock %}
+
+{% block dashboard_content %}
+    {#    <h1 class="mt-5">Web Interface</h1>#}
+    {#    <p class="lead">Welcome to the web interface</p>#}
+    <div class="row">
+        <div class="col-12">
+            <h1 class="my-2">{{ mission_name }} Web Interface</h1>
+            <p class="lead">Welcome to the {{ mission_name }} web interface</p>
+        </div> <!-- Close row -->
+    </div> <!-- Close row -->
+    <div class="row">
+        <div class="col-6">
+            <h3 class="mb-4">Satellite Visualization</h3>
+            <button id="load-iframe-btn" class="btn btn-primary mt-3">Load iFrame</button>
+            <iframe id="satvis-frame" allowtransparency="true"
+                    src="" style="display: block;"></iframe>
+        </div>
+        <div class="col-6">
+            <h3 class="mb-4">Telnet Output</h3>
+            <div id="telnet-output-box"></div>
+        </div>
+    </div>
+
+    <script>
+        // Load iFrame on button click
+        document.getElementById("load-iframe-btn").addEventListener("click", function () {
+            let iframe = document.getElementById("satvis-frame");
+            {#https://satvis.space/next/?tags=&gs=17.8953,48.9341&sats=STARLINK-32257&elements=Label,Orbit-track,Point&scene=2D#}
+            iframe.src = "https://satvis.space/next/?tags=&gs={{ ground_station_lat }},{{ ground_station_lon }}&sats={{ satellite_name_TLE }}&elements=Label,Orbit-track,Point&scene=2D";
+            iframe.style.display = "block";
+        });
+
+        // Telnet output
+        document.addEventListener('DOMContentLoaded', function () {
+            const outputBox = document.getElementById('telnet-output-box');
+            let lastOutput = '';
+
+            async function fetchTelnetOutput() {
+                try {
+                    const response = await fetch('{% url "telnet_output" %}');
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    const data = await response.json();
+                    const output = data.output.join('<br>');
+                    if (output !== lastOutput) {
+                        outputBox.innerHTML = output;
+                        outputBox.scrollTop = outputBox.scrollHeight;
+                        lastOutput = output;
+                    }
+                } catch (error) {
+                    outputBox.innerHTML = 'Error fetching telnet output';
+                    console.error('Error fetching telnet output:', error);
+                }
+            }
+
+            setInterval(fetchTelnetOutput, 5000);
+            fetchTelnetOutput();
+            document.getElementById("load-iframe-btn").click()
+            document.getElementById("load-iframe-btn").hidden = true// Initial call to populate the box immediately
+        });
+    </script>
+{% endblock %}

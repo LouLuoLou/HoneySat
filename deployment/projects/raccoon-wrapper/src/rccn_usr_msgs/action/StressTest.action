@@ -1,0 +1,12 @@
+# Goal
+string test_type  # Type of test: "RAM", "IO", "CPU", "SDR_RX", "SDR_TX"
+int32 duration  # Duration of the test in seconds
+string[] args  # Additional arguments specific to each test type
+---
+# Result
+bool success
+string message
+---
+# Feedback
+string status  # Current status of the test
+string[] output  # Output from the subprocess (stdout/stderr)

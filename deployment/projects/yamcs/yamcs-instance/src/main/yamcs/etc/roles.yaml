@@ -1,0 +1,7 @@
+Operator:
+  Command: [".*"]
+  CommandHistory: [".*"]
+  ReadParameter: [".*"]
+  ReadPacket: [".*"]
+  System:
+    - CommandOptions

@@ -1,0 +1,32 @@
+@if (role$ | async; as role) {
+  <app-admin-page>
+    <app-admin-toolbar>
+      {{ role.name }}
+    </app-admin-toolbar>
+    <div class="panel-content ya-link">
+      <h4>Description</h4>
+      <div style="white-space: pre-wrap">{{ role.description || "-" }}</div>
+      <br />
+      <div class="section-divider">
+        <mat-divider />
+      </div>
+      <h4>{{ role.systemPrivileges?.length || 0 }} assigned system privileges</h4>
+      @for (privilege of role.systemPrivileges; track privilege) {
+        <div>
+          {{ privilege }}
+        </div>
+      }
+      <br />
+      <div class="section-divider">
+        <mat-divider />
+      </div>
+      <h4>{{ role.objectPrivileges?.length || 0 }} assigned object privileges</h4>
+      <dl>
+        @for (privilege of role.objectPrivileges; track privilege) {
+          <dt>{{ privilege.type }}</dt>
+          <dd>{{ privilege.objects }}</dd>
+        }
+      </dl>
+    </div>
+  </app-admin-page>
+}

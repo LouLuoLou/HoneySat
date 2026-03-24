@@ -1,0 +1,53 @@
+{
+    "name": "RACCOON OS - ROS 2 Humble + Rust",
+    "remoteUser": "rosdev",
+    /*
+    "build": {
+        "dockerfile": "Dockerfile",
+        "args": {
+            "USERNAME": "rosdev",
+            "GID": "1000",
+            "UID": "1000"
+        },
+        "context": "..",
+        "target": "development"
+    },
+    */
+    "image": "docker.io/rccn/usr-dev",
+    /*
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "thermal-test",
+    */
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "charliermarsh.ruff",
+                "ms-vscode.cpptools-extension-pack",
+                "ms-iot.vscode-ros",
+                "smilerobotics.urdf",
+                "redhat.vscode-xml",
+                "tamasfe.even-better-toml",
+                "timonwong.shellcheck",
+                "yzhang.markdown-all-in-one",
+                "1YiB.rust-bundle",
+                "vadimcn.vscode-lldb"
+            ],
+            "settings": {
+                "files.associations": {
+                    "*.rviz": "yaml",
+                    "*.srdf": "xml",
+                    "*.urdf": "xml",
+                    "*.xacro": "xml"
+                }
+            }
+        }
+    },
+    "workspaceFolder": "/home/rosdev/ros2_ws",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/home/rosdev/ros2_ws,type=bind",
+    "mounts": [],
+    "runArgs": [
+        "--net=host"
+        /*"--userns=keep-id"*/
+    ]
+}
