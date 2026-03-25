@@ -2,30 +2,25 @@
 """
 Build ground truth (via dataset_telecommands.py), then write TWO CSVs for ML training:
 
-  1) telecommands_sample_100_anomalies.csv — first --sample-rows rows (default 100), sorted by time,
-     with ~2–5% of rows perturbed to “out of pass” timestamps + is_anomaly label.
-  2) telecommands_year_anomalies.csv — full --days window (default 365), same anomaly fraction.
+  1) telecommands_sample_100_anomalies.csv — first --sample-rows rows (default 100),
+     with ~2–5% of rows perturbed + is_anomaly label.
+  2) telecommands_year_anomalies.csv — full --days window (default 365), same fraction.
 
-Anomaly: same telecommand row but unix_timestamp moved to a random second that lies inside the
-dataset’s overall time span and OUTSIDE every visible pass [rise, set] (10° mask, Skyfield),
-so it mimics “command when satellite is not over the ground station.”
+Anomaly: timestamps outside visible passes (10° mask). Bursts: anomalies come in runs of
+--burst-min to --burst-max consecutive seconds (same idea as “one then 5–10 right after”).
 
 SETUP
   cd ~/ndss-artifact-eval
   source bin/activate
   pip install -r evaluation/requirements.txt
 
-RUN (build GT + both CSVs; needs network for CelesTrak TLE)
+RUN
   python3 evaluation/inject_anomalies.py --no-mongo
 
-RUN (reuse existing year ground-truth CSV; no dataset_telecommands run)
+RUN (reuse existing year ground-truth CSV)
   python3 evaluation/inject_anomalies.py --ground-truth telecommands_dataset.csv
 
-Example: 5% of 100 rows ≈ 5 anomalies
-  python3 evaluation/inject_anomalies.py --no-mongo --anomaly-fraction 0.05 --seed 42
-
-Default outputs are created in the CURRENT WORKING DIRECTORY (use repo root).
-Override paths: --out-sample PATH  --out-year PATH
+Outputs default to CURRENT WORKING DIRECTORY. Override: --out-sample / --out-year
 """
 from __future__ import annotations
 
@@ -42,7 +37,6 @@ from pathlib import Path
 import requests
 from skyfield.api import EarthSatellite, load, wgs84
 
-# Ground-truth columns from dataset_telecommands.py; we append is_anomaly when writing.
 COLS = (
     "unix_timestamp",
     "telecommand",
@@ -54,12 +48,10 @@ COLS = (
 
 
 def repo_root() -> Path:
-    """This file lives in evaluation/; repo root is one level up."""
     return Path(__file__).resolve().parent.parent
 
 
 def run_ground_truth_script(root: Path, out_csv: Path, days: int, no_mongo: bool) -> None:
-    """Spawn dataset_telecommands.py; raises CalledProcessError if it fails."""
     cmd = [
         sys.executable,
         str(root / "evaluation" / "dataset_telecommands.py"),
@@ -74,7 +66,6 @@ def run_ground_truth_script(root: Path, out_csv: Path, days: int, no_mongo: bool
 
 
 def load_rows(path: Path) -> list[dict[str, str]]:
-    """Read CSV; require exact column set so we do not corrupt training data."""
     with path.open(newline="", encoding="utf-8") as f:
         r = csv.DictReader(f)
         if r.fieldnames is None:
@@ -86,7 +77,6 @@ def load_rows(path: Path) -> list[dict[str, str]]:
 
 
 def _to_unix(t) -> int:
-    """Skyfield time -> UTC unix seconds."""
     d = t.utc_datetime()
     if d.tzinfo is None:
         d = d.replace(tzinfo=timezone.utc)
@@ -96,10 +86,6 @@ def _to_unix(t) -> int:
 def merged_pass_intervals(
     norad: int, lat: float, lon: float, elev_m: float, start: datetime, end: datetime
 ) -> list[tuple[int, int]]:
-    """
-    Download TLE, run Skyfield find_events (10° mask), take each rise–peak–set triplet,
-    keep [rise_unix, set_unix], merge overlapping/adjacent passes into continuous intervals.
-    """
     resp = requests.get(
         f"https://celestrak.org/NORAD/elements/gp.php?CATNR={norad}&FORMAT=TLE",
         timeout=45,
@@ -117,7 +103,6 @@ def merged_pass_intervals(
     raw: list[tuple[int, int]] = []
     i = 0
     while i + 2 < len(evs):
-        # Event codes: 0 rise, 1 culmination, 2 set — only use complete passes
         if evs[i] == 0 and evs[i + 1] == 1 and evs[i + 2] == 2:
             raw.append((_to_unix(times[i]), _to_unix(times[i + 2])))
             i += 3
@@ -137,7 +122,6 @@ def merged_pass_intervals(
 
 
 def gaps(t_lo: int, t_hi: int, merged: list[tuple[int, int]]) -> list[tuple[int, int]]:
-    """List sub-intervals of [t_lo, t_hi] that are NOT inside any merged pass."""
     if t_lo > t_hi:
         return []
     if not merged:
@@ -154,7 +138,6 @@ def gaps(t_lo: int, t_hi: int, merged: list[tuple[int, int]]) -> list[tuple[int,
 
 
 def pick_outside(rng: random.Random, t_lo: int, t_hi: int, merged: list[tuple[int, int]]) -> int:
-    """Pick one unix second uniformly from the union of gaps (between passes)."""
     g = gaps(t_lo, t_hi, merged)
     if not g:
         raise ValueError("no time outside passes inside this CSV window")
@@ -168,8 +151,43 @@ def pick_outside(rng: random.Random, t_lo: int, t_hi: int, merged: list[tuple[in
 
 
 def outside(u: int, merged: list[tuple[int, int]]) -> bool:
-    """True if unix u is not inside any pass interval."""
     return not any(lo <= u <= hi for lo, hi in merged)
+
+
+def plan_bursts(rng: random.Random, k: int, bmin: int, bmax: int) -> list[int]:
+    """Split k rows into burst lengths; each piece in [bmin, bmax] when possible."""
+    out, left = [], k
+    while left > 0:
+        if left < bmin:
+            out.append(left)
+            break
+        sz = min(left, rng.randint(bmin, bmax))
+        out.append(sz)
+        left -= sz
+    return out
+
+
+def pick_burst_start_fast(
+    rng: random.Random,
+    glist: list[tuple[int, int]],
+    L: int,
+    occupied: set[int],
+    tries_per_gap: int = 80,
+) -> int | None:
+    """
+    Find t0 so t0..t0+L-1 lies in one gap and avoids occupied. O(tries) per call, no huge lists.
+    """
+    wide = [(a, b) for a, b in glist if b - a + 1 >= L]
+    if not wide:
+        return None
+    rng.shuffle(wide)
+    for a, b in wide:
+        hi_start = b - L + 1
+        for _ in range(tries_per_gap):
+            t0 = rng.randint(a, hi_start)
+            if all((t0 + i) not in occupied for i in range(L)):
+                return t0
+    return None
 
 
 def inject_write(
@@ -178,12 +196,9 @@ def inject_write(
     frac: float,
     seed: int | None,
     elev: float,
+    burst_min: int,
+    burst_max: int,
 ) -> tuple[int, int]:
-    """
-    For this subset: recompute passes over [min_ts, max_ts] in the CSV, flip ~frac rows to
-    random “gap” timestamps, sort, dedupe seconds (+1 like ground-truth builder), write CSV
-    with is_anomaly. Returns (n_rows, count where is_anomaly==1).
-    """
     n = len(rows)
     if n == 0:
         raise ValueError("no rows to inject")
@@ -206,15 +221,37 @@ def inject_write(
         raise ValueError("no full passes in window; cannot place out-of-pass times")
     pick_outside(random.Random(0), t_lo, t_hi, merged)
 
+    glist = gaps(t_lo, t_hi, merged)
     rng = random.Random(seed)
-    # k = floor(n*frac), but at least 1 when frac>0 and n>=1 (matches prior inject script)
     k = (max(1, int(n * frac)) if frac > 0 else 0) if n else 0
     k = min(n, k)
-    targets = set(rng.sample(range(n), k)) if k else set()
+    burst_sizes = plan_bursts(rng, k, burst_min, burst_max)
 
-    for i in targets:
-        rows[i]["unix_timestamp"] = str(pick_outside(rng, t_lo, t_hi, merged))
-        rows[i]["_t"] = "1"
+    occupied = set(ts)
+    chosen: list[int] = []
+
+    for want in burst_sizes:
+        L = want
+        t0 = None
+        while L >= 1:
+            t0 = pick_burst_start_fast(rng, glist, L, occupied)
+            if t0 is not None:
+                break
+            L -= 1
+        if t0 is None:
+            raise ValueError("could not place burst; lower --burst-max or fraction")
+
+        pool = [i for i in range(n) if i not in chosen]
+        if len(pool) < L:
+            raise ValueError("not enough rows for burst")
+        pick = rng.sample(pool, L)
+        for j, idx in enumerate(pick):
+            u = t0 + j
+            rows[idx]["unix_timestamp"] = str(u)
+            rows[idx]["_t"] = "1"
+            occupied.add(u)
+        chosen.extend(pick)
+
     for r in rows:
         r.setdefault("_t", "0")
 
@@ -246,7 +283,7 @@ def inject_write(
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Build GT + two anomaly-labeled CSVs (sample + year)")
+    ap = argparse.ArgumentParser(description="Build GT + two burst-anomaly CSVs (sample + year)")
     ap.add_argument("--ground-truth", type=Path, default=None, help="existing year CSV; skip dataset_telecommands")
     ap.add_argument("--no-mongo", action="store_true", help="pass to dataset_telecommands when building GT")
     ap.add_argument("--days", type=int, default=365, help="UTC lookback for GT when building")
@@ -259,12 +296,17 @@ def main() -> int:
     )
     ap.add_argument("--seed", type=int, default=42, help="RNG seed for year file; sample uses seed+1")
     ap.add_argument("--elev", type=float, default=1140.0, help="observer HAE m; must match dataset_telecommands")
+    ap.add_argument("--burst-min", type=int, default=5, help="min consecutive seconds per burst")
+    ap.add_argument("--burst-max", type=int, default=10, help="max consecutive seconds per burst")
     ap.add_argument("--out-sample", type=Path, default=Path("telecommands_sample_100_anomalies.csv"))
     ap.add_argument("--out-year", type=Path, default=Path("telecommands_year_anomalies.csv"))
     args = ap.parse_args()
 
     if not 0.02 <= args.anomaly_fraction <= 0.05:
         print("--anomaly-fraction must be between 0.02 and 0.05", file=sys.stderr)
+        return 1
+    if args.burst_min < 1 or args.burst_max < args.burst_min:
+        print("--burst-min / --burst-max invalid", file=sys.stderr)
         return 1
 
     root = repo_root()
@@ -282,11 +324,30 @@ def main() -> int:
         full = load_rows(gt_path)
         sample = [dict(r) for r in full[: max(0, min(args.sample_rows, len(full)))]]
 
-        print(f"Injecting anomalies (fraction={args.anomaly_fraction}) …")
-        ny, y1 = inject_write(sample, args.out_sample, args.anomaly_fraction, args.seed + 1, args.elev)
+        print(
+            f"Injecting burst anomalies (fraction={args.anomaly_fraction}, "
+            f"burst {args.burst_min}-{args.burst_max}s) …"
+        )
+        ny, y1 = inject_write(
+            sample,
+            args.out_sample,
+            args.anomaly_fraction,
+            args.seed + 1,
+            args.elev,
+            args.burst_min,
+            args.burst_max,
+        )
         print(f"  sample: {ny} rows, is_anomaly=1 -> {y1}  -> {args.out_sample.resolve()}")
 
-        ny, y1 = inject_write([dict(r) for r in full], args.out_year, args.anomaly_fraction, args.seed, args.elev)
+        ny, y1 = inject_write(
+            [dict(r) for r in full],
+            args.out_year,
+            args.anomaly_fraction,
+            args.seed,
+            args.elev,
+            args.burst_min,
+            args.burst_max,
+        )
         print(f"  year:   {ny} rows, is_anomaly=1 -> {y1}  -> {args.out_year.resolve()}")
     except (subprocess.CalledProcessError, ValueError, OSError) as e:
         print(e, file=sys.stderr)
