@@ -14,10 +14,14 @@ vocabulary in our CSVs). For production, fit OneHotEncoder on train only.
 Run from repository root:
   python3 evaluation/train_isolation_forest.py
   python3 evaluation/train_isolation_forest.py --csv telecommands_year_anomalies.csv
+
+Plots and joblib names include a tag from the CSV stem (e.g. ..._telecommands_sample_100_anomalies.png)
+so different CSVs do not overwrite each other. Override with --run-tag.
 """
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 import warnings
 from pathlib import Path
@@ -79,6 +83,12 @@ def train_contamination(y_train: pd.Series, override: float | None) -> float:
     return min(max(rate, 1e-6), 0.49)
 
 
+def slug_from_csv(path: Path) -> str:
+    """Safe filename fragment from CSV stem (e.g. telecommands_year_anomalies)."""
+    s = re.sub(r"[^a-zA-Z0-9_-]+", "_", path.stem).strip("_")
+    return s or "dataset"
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description="Isolation Forest on telecommand anomaly CSV")
     p.add_argument(
@@ -93,6 +103,11 @@ def main() -> int:
         type=float,
         default=None,
         help="Override IF contamination; default = training-set anomaly rate (clamped)",
+    )
+    p.add_argument(
+        "--run-tag",
+        default=None,
+        help="Short name for output files (default: derived from --csv filename stem)",
     )
     p.add_argument(
         "--output-dir",
@@ -113,6 +128,8 @@ def main() -> int:
     if not csv_path.is_file():
         print(f"File not found: {csv_path.resolve()}", file=sys.stderr)
         return 1
+
+    run_tag = args.run_tag if args.run_tag else slug_from_csv(csv_path)
 
     df = pd.read_csv(csv_path)
     df.columns = [str(c).strip() for c in df.columns]
@@ -176,6 +193,7 @@ def main() -> int:
     tn, fp, fn, tp = cm.ravel()
 
     print(f"CSV: {csv_path}")
+    print(f"Output tag: {run_tag}")
     print(f"Test size: {len(y_test)}  contamination (used): {contam:.6f}")
     print(f"accuracy:  {acc:.4f}")
     print(f"precision: {prec:.4f}")
@@ -210,24 +228,32 @@ def main() -> int:
         plt.savefig(path, dpi=150)
         plt.close()
 
+    pred_png = plot_dir / f"iforest_pred_{run_tag}.png"
+    true_png = plot_dir / f"iforest_true_{run_tag}.png"
     scatter_pred(
         y_pred,
-        "Isolation Forest: predicted normal vs anomaly (test set)",
-        plot_dir / "iforest_pred.png",
+        f"Isolation Forest: predicted (test) — {run_tag}",
+        pred_png,
     )
     scatter_pred(
         y_test.to_numpy(),
-        "Ground truth is_anomaly (test set)",
-        plot_dir / "iforest_true.png",
+        f"Ground truth is_anomaly (test) — {run_tag}",
+        true_png,
     )
-    print(f"Saved plots: {plot_dir / 'iforest_pred.png'}, {plot_dir / 'iforest_true.png'}")
+    print(f"Saved plots: {pred_png}, {true_png}")
 
     if args.save_model:
         if joblib is None:
             print("joblib not installed; skip model save.", file=sys.stderr)
         else:
-            bundle = {"model": clf, "scaler": scaler, "feature_columns": list(X.columns)}
-            model_path = model_dir / "isolation_forest.joblib"
+            bundle = {
+                "model": clf,
+                "scaler": scaler,
+                "feature_columns": list(X.columns),
+                "run_tag": run_tag,
+                "csv_path": str(csv_path),
+            }
+            model_path = model_dir / f"isolation_forest_{run_tag}.joblib"
             joblib.dump(bundle, model_path)
             print(f"Saved model: {model_path}")
 
