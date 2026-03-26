@@ -1,0 +1,5 @@
+# ML training outputs (train_isolation_forest.py)
+outputs/
+
+__pycache__/
+*.pyc
