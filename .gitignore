@@ -1,0 +1,7 @@
+# venv in repo root (python3 -m venv .)
+bin/
+lib/
+lib64/
+include/
+share/
+pyvenv.cfg
